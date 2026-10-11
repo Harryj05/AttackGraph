@@ -115,10 +115,10 @@ const getLayoutedElements = (
   const connectedNodes = visibleNodes.filter((n) => connectedNodeIds.has(n.id));
   const disconnectedNodes = visibleNodes.filter((n) => !connectedNodeIds.has(n.id));
 
-  // Run Dagre layout on connected graph
+  // Run Dagre layout on connected graph - ranksep 200 enforces >160px length between connected nodes
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
-  dagreGraph.setGraph({ rankdir: 'LR', ranksep: 120, nodesep: 40 });
+  dagreGraph.setGraph({ rankdir: 'LR', ranksep: 200, nodesep: 80 });
 
   connectedNodes.forEach((node) => {
     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });

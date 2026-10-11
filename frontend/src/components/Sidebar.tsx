@@ -44,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onSelectView }) =
             </div>
             <div>
               <div className="text-xs font-bold tracking-wider text-slate-100 uppercase">
-                ATTACKGRAPH
+                ATTACKGRAPH AI
               </div>
               <div className="text-[10px] font-mono text-indigo-400">SOC v0.1</div>
             </div>

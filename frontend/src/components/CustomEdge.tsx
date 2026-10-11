@@ -5,6 +5,7 @@ import {
   type EdgeProps 
 } from '@xyflow/react';
 import type { GraphEdge } from '../types';
+import { formatRelationType } from '../utils/relationLabels';
 
 export interface CustomEdgeData {
   edge: GraphEdge;
@@ -28,7 +29,6 @@ export const CustomEdge = memo(({
   const offsetIndex = customData.offsetIndex || 0;
   const totalParallel = customData.totalParallelEdges || 1;
 
-
   if (!edgeData) return null;
 
   // Calculate curvature offset for parallel edges between same source/target
@@ -50,17 +50,12 @@ export const CustomEdge = memo(({
   // Calculate offset label position so pills don't collide
   const labelOffsetY = (offsetIndex - (totalParallel - 1) / 2) * 26;
 
-  // Relation label humanization
-  const humaniseRelation = (rel: string) => {
-    switch (rel) {
-      case 'access_control_check':
-        return 'possible access control issue';
-      case 'reflected_input_check':
-        return 'reflected input issue';
-      default:
-        return rel.replace(/_/g, ' ');
-    }
-  };
+  // Relation label formatting & truncation at ~22 characters
+  const fullRelationText = formatRelationType(edgeData.relation_type);
+  const maxLabelLength = 22;
+  const displayRelationText = fullRelationText.length > maxLabelLength
+    ? fullRelationText.slice(0, maxLabelLength).trimEnd() + '…'
+    : fullRelationText;
 
   const status = edgeData.status || 'unverified';
   const confidence = edgeData.confidence;
@@ -68,20 +63,20 @@ export const CustomEdge = memo(({
     ? confidence.toFixed(2) 
     : 'N/A';
 
-  // Semantic styles
+  // Semantic styles - solid dark background, 1px border, color by status, no glow band
   let strokeColor = '#F59E0B'; // unverified amber
   let strokeDasharray: string | undefined = undefined;
-  let pillBorder = 'border-amber-500/60';
+  let pillBorder = 'border-amber-500/80';
   let pillText = 'text-amber-400';
   let opacity = 1;
 
   if (status === 'verified') {
     strokeColor = '#22C55E'; // green
-    pillBorder = 'border-emerald-500/80 bg-emerald-950/40';
+    pillBorder = 'border-emerald-500/80';
     pillText = 'text-emerald-400';
   } else if (status === 'unverified') {
     strokeColor = '#F59E0B'; // amber
-    pillBorder = 'border-amber-500/80 bg-amber-950/40';
+    pillBorder = 'border-amber-500/80';
     pillText = 'text-amber-400';
     if (confidence !== null && confidence !== undefined) {
       opacity = Math.max(0.4, confidence);
@@ -89,12 +84,12 @@ export const CustomEdge = memo(({
   } else if (status === 'refuted') {
     strokeColor = '#6B7280'; // grey
     strokeDasharray = '5 5';
-    pillBorder = 'border-slate-500/60 bg-slate-900/60 border-dashed';
+    pillBorder = 'border-slate-500/80 border-dashed';
     pillText = 'text-slate-400';
   } else if (status === 'human_invalidated') {
     strokeColor = '#E879F9'; // magenta
     strokeDasharray = '5 5';
-    pillBorder = 'border-pink-500/80 bg-pink-950/40 border-dashed';
+    pillBorder = 'border-pink-500/80 border-dashed';
     pillText = 'text-pink-400';
   }
 
@@ -123,7 +118,7 @@ export const CustomEdge = memo(({
         className="react-flow__edge-path transition-all duration-200"
         d={edgePath}
         stroke={strokeColor}
-        strokeWidth={selected ? 3.5 : 2}
+        strokeWidth={selected ? 2.5 : 1.75}
         strokeDasharray={strokeDasharray}
         strokeOpacity={opacity}
         markerEnd={`url(#${markerId})`}
@@ -139,13 +134,14 @@ export const CustomEdge = memo(({
           className="nodrag nopan"
         >
           <div
-            className={`px-2.5 py-1 rounded-full border bg-[#0B0D1A] text-[10px] font-mono font-semibold flex items-center gap-1.5 shadow-md cursor-pointer transition-all hover:scale-105 ${pillBorder} ${pillText} ${
+            title={fullRelationText}
+            className={`px-3 py-1 rounded-full border bg-[#0B0D1A] text-[11px] font-mono font-medium flex items-center gap-1.5 shadow-md cursor-pointer transition-all hover:scale-105 select-none ${pillBorder} ${pillText} ${
               selected ? 'ring-2 ring-indigo-500 shadow-indigo-500/20' : ''
             }`}
             style={{ opacity }}
           >
-            <span>{humaniseRelation(edgeData.relation_type)}</span>
-            <span className="px-1 py-0.2 rounded bg-[#ffffff15] font-bold text-[9px]">
+            <span title={fullRelationText}>{displayRelationText}</span>
+            <span className="px-1.5 py-0.5 rounded bg-white/10 font-bold text-[10px] text-slate-200">
               {confText}
             </span>
           </div>

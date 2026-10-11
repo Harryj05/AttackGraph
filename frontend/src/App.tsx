@@ -254,7 +254,7 @@ export function App() {
     return (
       <div className="h-screen w-screen bg-[#0B0D1A] flex flex-col items-center justify-center text-xs font-mono text-slate-400 gap-3">
         <RefreshCw className="w-6 h-6 animate-spin text-[#6366F1]" />
-        <span>INITIALIZING ATTACKGRAPH SOC FRONTEND...</span>
+        <span>INITIALIZING ATTACKGRAPH AI SOC FRONTEND...</span>
       </div>
     );
   }

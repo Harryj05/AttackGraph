@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { GraphNode, GraphEdge, Evidence, Scan } from '../types';
 import { fetchNodeEvidence, submitHumanReview, reverifyEdge } from '../api/client';
+import { formatRelationType } from '../utils/relationLabels';
 import {
   Sliders,
   X,
@@ -174,19 +175,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
     return <Database className="w-4 h-4 text-slate-400" />;
   };
 
-  // Humanised relation string
-  const humaniseRelation = (rel: string) => {
-    switch (rel) {
-      case 'access_control_check':
-      case 'possible_access_control_issue':
-        return 'possible access control issue';
-      case 'reflected_input_check':
-      case 'possible_reflected_input':
-        return 'reflected input issue';
-      default:
-        return rel.replace(/_/g, ' ');
-    }
-  };
+  // Humanised relation string via lookup map
+  const humaniseRelation = (rel: string) => formatRelationType(rel);
 
   const sourceNode = selectedEdge ? nodes.find((n) => n.id === selectedEdge.source_node_id) : null;
   const targetNode = selectedEdge ? nodes.find((n) => n.id === selectedEdge.target_node_id) : null;
@@ -406,11 +396,11 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                               {relEdge.status}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between text-slate-300">
-                            <span className="truncate max-w-[200px] font-sans">
+                          <div className="flex items-start justify-between text-slate-300 gap-2">
+                            <span className="break-words whitespace-normal font-sans">
                               {otherNode?.label || otherNodeId.slice(0, 8)}
                             </span>
-                            <span className="font-mono text-[10px] text-slate-400">
+                            <span className="font-mono text-[10px] text-slate-400 shrink-0">
                               conf: {confText}
                             </span>
                           </div>
@@ -455,13 +445,13 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                           </span>
                         </div>
 
-                        {/* Parsed Findings Summary */}
+                        {/* Parsed Findings Summary - wrap long finding names with full text */}
                         {ev.parsed_findings && (
-                          <div className="bg-[#0B0D1A] p-2 rounded-lg border border-[#ffffff0a] font-mono text-[11px] space-y-1">
+                          <div className="bg-[#0B0D1A] p-2 rounded-lg border border-[#ffffff0a] font-mono text-[11px] space-y-1.5">
                             {Object.entries(ev.parsed_findings).map(([k, v]) => (
-                              <div key={k} className="flex justify-between gap-2">
-                                <span className="text-slate-400">{k}:</span>
-                                <span className="text-slate-200 truncate max-w-[160px]">
+                              <div key={k} className="flex flex-col gap-0.5">
+                                <span className="text-slate-400 break-words">{k}:</span>
+                                <span className="text-slate-200 break-words break-all whitespace-normal">
                                   {typeof v === 'object' ? JSON.stringify(v) : String(v)}
                                 </span>
                               </div>
@@ -539,19 +529,19 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 <div className="space-y-1.5 pt-1 font-mono text-xs">
                   <button
                     onClick={() => sourceNode && onSelectNode(sourceNode)}
-                    className="text-left font-semibold text-slate-200 hover:text-indigo-300 hover:underline block truncate w-full cursor-pointer"
+                    className="text-left font-semibold text-slate-200 hover:text-indigo-300 hover:underline block break-words whitespace-normal w-full cursor-pointer"
                   >
                     {sourceNode?.label || selectedEdge.source_node_id}
                   </button>
 
                   <div className="flex items-center gap-1.5 text-indigo-400 font-bold text-[11px] py-1">
                     <ArrowRight className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>{humaniseRelation(selectedEdge.relation_type)}</span>
+                    <span className="break-words">{formatRelationType(selectedEdge.relation_type)}</span>
                   </div>
 
                   <button
                     onClick={() => targetNode && onSelectNode(targetNode)}
-                    className="text-left font-semibold text-slate-200 hover:text-indigo-300 hover:underline block truncate w-full cursor-pointer"
+                    className="text-left font-semibold text-slate-200 hover:text-indigo-300 hover:underline block break-words whitespace-normal w-full cursor-pointer"
                   >
                     {targetNode?.label || selectedEdge.target_node_id}
                   </button>

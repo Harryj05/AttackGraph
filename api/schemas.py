@@ -53,6 +53,7 @@ class EdgeResponse(BaseModel):
     relation_type: str
     pattern_key: Optional[str] = None
     confidence: Optional[float] = None
+    evidence_only_confidence: Optional[float] = None
     status: str
     verification_outcome: Optional[str] = None
     reasoning: Optional[str] = None
@@ -166,6 +167,7 @@ class GraphEdgeResponse(BaseModel):
     target_node_id: str
     relation_type: str
     confidence: Optional[float] = None
+    evidence_only_confidence: Optional[float] = None
     status: str
     reasoning: Optional[str] = None
     pattern_key: Optional[str] = None
