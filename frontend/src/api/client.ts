@@ -1,9 +1,19 @@
 import type { Scan, GraphData, Evidence, AgentLog, HumanReviewResponse, ReplayEvent, CalibrationReport } from '../types';
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_KEY = (import.meta as any).env?.VITE_API_KEY || 'attackgraph-insecure-dev-key';
+
+function getHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
+  return {
+    'X-API-Key': API_KEY,
+    ...extraHeaders,
+  };
+}
 
 export async function fetchScans(): Promise<Scan[]> {
-  const res = await fetch(`${API_BASE_URL}/scans`);
+  const res = await fetch(`${API_BASE_URL}/scans`, {
+    headers: getHeaders(),
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch scans: ${res.statusText}`);
   }
@@ -11,7 +21,9 @@ export async function fetchScans(): Promise<Scan[]> {
 }
 
 export async function fetchGlobalCalibration(): Promise<CalibrationReport> {
-  const res = await fetch(`${API_BASE_URL}/calibration`);
+  const res = await fetch(`${API_BASE_URL}/calibration`, {
+    headers: getHeaders(),
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch global calibration: ${res.statusText}`);
   }
@@ -19,7 +31,9 @@ export async function fetchGlobalCalibration(): Promise<CalibrationReport> {
 }
 
 export async function fetchScanCalibration(scanId: string): Promise<CalibrationReport> {
-  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/calibration`);
+  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/calibration`, {
+    headers: getHeaders(),
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch scan calibration for ${scanId}: ${res.statusText}`);
   }
@@ -27,7 +41,9 @@ export async function fetchScanCalibration(scanId: string): Promise<CalibrationR
 }
 
 export async function fetchScanGraph(scanId: string): Promise<GraphData> {
-  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/graph`);
+  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/graph`, {
+    headers: getHeaders(),
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch graph for scan ${scanId}: ${res.statusText}`);
   }
@@ -35,7 +51,9 @@ export async function fetchScanGraph(scanId: string): Promise<GraphData> {
 }
 
 export async function fetchReplayEvents(scanId: string): Promise<ReplayEvent[]> {
-  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/replay`);
+  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/replay`, {
+    headers: getHeaders(),
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch replay events for scan ${scanId}: ${res.statusText}`);
   }
@@ -43,7 +61,9 @@ export async function fetchReplayEvents(scanId: string): Promise<ReplayEvent[]> 
 }
 
 export async function fetchNodeEvidence(scanId: string, nodeId: string): Promise<Evidence[]> {
-  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/nodes/${nodeId}/evidence`);
+  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/nodes/${nodeId}/evidence`, {
+    headers: getHeaders(),
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch evidence for node ${nodeId}: ${res.statusText}`);
   }
@@ -51,7 +71,9 @@ export async function fetchNodeEvidence(scanId: string, nodeId: string): Promise
 }
 
 export async function fetchAgentLog(scanId: string): Promise<AgentLog[]> {
-  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/agent-log`);
+  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/agent-log`, {
+    headers: getHeaders(),
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch agent log for scan ${scanId}: ${res.statusText}`);
   }
@@ -67,9 +89,9 @@ export async function submitHumanReview(
 ): Promise<HumanReviewResponse> {
   const res = await fetch(`${API_BASE_URL}/scans/${scanId}/edges/${edgeId}/human-review`, {
     method: 'POST',
-    headers: {
+    headers: getHeaders({
       'Content-Type': 'application/json',
-    },
+    }),
     body: JSON.stringify({
       decision,
       reviewer,
@@ -85,9 +107,9 @@ export async function submitHumanReview(
 export async function reverifyEdge(scanId: string, edgeId: string): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/scans/${scanId}/edges/${edgeId}/reverify`, {
     method: 'POST',
-    headers: {
+    headers: getHeaders({
       'Content-Type': 'application/json',
-    },
+    }),
   });
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({}));
@@ -96,12 +118,13 @@ export async function reverifyEdge(scanId: string, edgeId: string): Promise<any>
   return res.json();
 }
 
-export async function runAgent(scanId: string, maxSteps: number = 15): Promise<any> {
-  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/agent/run?max_steps=${maxSteps}`, {
+export async function runAgent(scanId: string, maxSteps: number = 15, mode: string = 'agent'): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/agent/run?max_steps=${maxSteps}&mode=${mode}`, {
     method: 'POST',
-    headers: {
+    headers: getHeaders({
       'Content-Type': 'application/json',
-    },
+    }),
+    body: JSON.stringify({ max_steps: maxSteps, mode }),
   });
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({}));
@@ -113,9 +136,9 @@ export async function runAgent(scanId: string, maxSteps: number = 15): Promise<a
 export async function createScan(targetUrl: string): Promise<Scan> {
   const res = await fetch(`${API_BASE_URL}/scans`, {
     method: 'POST',
-    headers: {
+    headers: getHeaders({
       'Content-Type': 'application/json',
-    },
+    }),
     body: JSON.stringify({ target_url: targetUrl }),
   });
   if (!res.ok) {
@@ -125,4 +148,10 @@ export async function createScan(targetUrl: string): Promise<Scan> {
   return res.json();
 }
 
+export function getExportSarifUrl(scanId: string): string {
+  return `${API_BASE_URL}/scans/${scanId}/export/sarif?api_key=${encodeURIComponent(API_KEY)}`;
+}
 
+export function getExportPdfUrl(scanId: string): string {
+  return `${API_BASE_URL}/scans/${scanId}/export/pdf?api_key=${encodeURIComponent(API_KEY)}`;
+}

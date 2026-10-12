@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+
+from api.auth import verify_api_key
 from api.routes import scans, calibration, pattern_stats
 
 app = FastAPI(
@@ -8,19 +11,25 @@ app = FastAPI(
     version="0.1.0"
 )
 
+# CORS: Configured from env with strict localhost default, never wildcard
+raw_cors = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
+allowed_origins = [o.strip() for o in raw_cors.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(scans.router)
-app.include_router(calibration.router)
-app.include_router(pattern_stats.router)
+# Protected routes require valid X-API-Key (or ?api_key= query param)
+app.include_router(scans.router, dependencies=[Depends(verify_api_key)])
+app.include_router(calibration.router, dependencies=[Depends(verify_api_key)])
+app.include_router(pattern_stats.router, dependencies=[Depends(verify_api_key)])
+
 
 @app.get("/health")
 def health_check():
+    """Unauthenticated liveness probe."""
     return {"status": "ok", "service": "AttackGraph AI API"}
-

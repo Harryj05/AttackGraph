@@ -32,11 +32,15 @@ def calculate_node_impact(node_id: str, scan_id: str, db: Session) -> Dict[str, 
     if not node:
         raise ValueError(f"Node '{node_id}' not found in scan '{scan_id}'.")
 
-    # Fetch active edges only (excluding human_invalidated and refuted)
+    # Fetch active attack-layer edges only (excluding human_invalidated, refuted, and asset-layer edges)
     all_edges = db.query(Edge).filter(Edge.scan_id == scan_id).all()
-    active_edges = [e for e in all_edges if e.status not in ["human_invalidated", "refuted"]]
+    active_edges = [
+        e for e in all_edges
+        if e.status not in ["human_invalidated", "refuted"]
+        and getattr(e, "layer", "attack") == "attack"
+    ]
 
-    # Forward adjacency list built strictly from ACTIVE edges
+    # Forward adjacency list built strictly from ACTIVE attack-layer edges
     forward_graph: Dict[str, List[str]] = {}
     for e in active_edges:
         if e.source_node_id not in forward_graph:
@@ -62,7 +66,7 @@ def calculate_node_impact(node_id: str, scan_id: str, db: Session) -> Dict[str, 
 
     nodes_disconnected_if_removed: List[str] = []
 
-    # Helper function to check if target node is reachable from any root node via active edges
+    # Helper function to check if target node is reachable from any root node via active attack edges
     def is_node_reachable_from_root(target_id: str, exclude_node_id: Optional[str] = None) -> bool:
         all_paths = find_all_paths_to_node(target_id, scan_id, db)
         for path in all_paths:
@@ -80,7 +84,7 @@ def calculate_node_impact(node_id: str, scan_id: str, db: Session) -> Dict[str, 
                     Edge.target_node_id == t_id
                 ).first()
 
-                if not edge or edge.status in ["human_invalidated", "refuted"]:
+                if not edge or edge.status in ["human_invalidated", "refuted"] or getattr(edge, "layer", "attack") != "attack":
                     path_valid = False
                     break
 

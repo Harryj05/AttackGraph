@@ -20,3 +20,12 @@ allowed_targets:
       - "http://127.0.0.1:8080"
       - "http://dvwa:80"
     description: "Damn Vulnerable Web Application local docker container"
+
+  - name: crapi
+    host: localhost
+    port: 8888
+    urls:
+      - "http://localhost:8888"
+      - "http://127.0.0.1:8888"
+      - "http://crapi-web:80"
+    description: "OWASP crAPI local docker container (services: crapi-web:8888, mailhog:8025, identity, community, workshop, chatbot, postgresdb, mongodb)"

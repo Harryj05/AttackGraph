@@ -273,17 +273,23 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 </h3>
 
                 {/* Flags */}
-                {selectedNode.is_critical && (
-                  <div className="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-medium flex items-center gap-2">
-                    <Crown className="w-4 h-4 shrink-0" />
-                    <div>
-                      <div className="font-bold">Critical Bottleneck Node</div>
-                      <div className="text-[10px] text-rose-300/80 font-normal">
-                        Remediating this node breaks downstream attack paths.
+                {selectedNode.is_critical && (() => {
+                  const downstreamEdges = edges.filter((e) => e.source_node_id === selectedNode.id);
+                  const disconnectionImpact = (selectedNode as any).disconnection_impact_score ?? (selectedNode.properties?.disconnection_impact_score ?? downstreamEdges.length);
+                  return (
+                    <div className="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-medium flex items-center gap-2">
+                      <Crown className="w-4 h-4 shrink-0" />
+                      <div>
+                        <div className="font-bold">Critical Bottleneck Node</div>
+                        <div className="text-[10px] text-rose-300/80 font-normal">
+                          {disconnectionImpact > 0
+                            ? "Remediating this node breaks downstream attack paths."
+                            : "No downstream paths depend on this node."}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {selectedNode.undermined && (
                   <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-medium flex items-start gap-2">
@@ -512,7 +518,16 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               {/* Header Connection Chain */}
               <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3.5 space-y-2">
                 <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                  <span>EDGE #{selectedEdge.id.slice(0, 8)}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span>EDGE #{selectedEdge.id.slice(0, 8)}</span>
+                    <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider border ${
+                      (selectedEdge.layer === 'asset' || ['has_endpoint', 'runs_service'].includes(selectedEdge.relation_type.toLowerCase()))
+                        ? 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+                        : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                    }`}>
+                      {(selectedEdge.layer === 'asset' || ['has_endpoint', 'runs_service'].includes(selectedEdge.relation_type.toLowerCase())) ? 'Asset Layer' : 'Attack Layer'}
+                    </span>
+                  </div>
                   <span className={`px-2 py-0.5 rounded-full font-semibold text-[9px] uppercase border ${
                     selectedEdge.status === 'verified'
                       ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
@@ -574,10 +589,10 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                   </div>
                 </div>
 
-                {/* 2. Blended with Prior */}
+                {/* 2. Blended via Empirical Smoothing */}
                 <div className="space-y-1">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-400">Blended with prior</span>
+                    <span className="text-slate-400">Empirical smoothing prior</span>
                     <span className="font-mono text-emerald-400 font-semibold">
                       {selectedEdge.confidence != null
                         ? `${(selectedEdge.confidence * 100).toFixed(0)}%`
@@ -595,7 +610,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 </div>
 
                 <div className="text-[10px] text-slate-400 italic pt-1 border-t border-[#ffffff0a]">
-                  Blended = evidence weighted against learned history of this pattern
+                  Empirical smoothing = evidence weighted against empirical historical pattern outcomes
                 </div>
               </div>
 

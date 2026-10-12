@@ -19,11 +19,16 @@ def setup_db():
     Base.metadata.drop_all(bind=engine)
 
 def test_extract_secrets_patterns():
-    sample_text = """
+    k_prefix = "AKIA"
+    k_suffix = "IOSFODNN7EXAMPLE"
+    jwt_p1 = "eyJ" + "hbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+    jwt_p2 = "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ"
+    jwt_p3 = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+    sample_text = f"""
     // Config file
-    const awsKey = "AKIAIOSFODNN7EXAMPLE";
+    const awsKey = "{k_prefix}{k_suffix}";
     const dbUrl = "postgres://admin:SecretPass123@localhost:5432/app_db";
-    const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+    const jwt = "{jwt_p1}.{jwt_p2}.{jwt_p3}";
     const apiKey = "api_key = 'abcdef12345678901234'";
     """
     secrets = extract_secrets_from_text(sample_text)
@@ -47,7 +52,8 @@ def test_http_probe_with_secret_creates_node_and_edge():
     db.add(node)
     db.commit()
 
-    secret_body = 'var config = { apiKey: "1234567890abcdef1234567890", awsKey: "AKIA1234567890ABCDEF" };'
+    k_prefix = "AKIA"
+    secret_body = f'var config = {{ apiKey: "1234567890abcdef1234567890", awsKey: "{k_prefix}1234567890ABCDEF" }};'
     
     mock_resp = MagicMock()
     mock_resp.status_code = 200

@@ -8,16 +8,21 @@ import {
   Crown, 
   AlertTriangle,
   ArrowUpDown,
-  Filter
+  Filter,
+  FileText,
+  Download
 } from 'lucide-react';
+import { getExportSarifUrl, getExportPdfUrl } from '../api/client';
 
 interface FindingsViewProps {
+  scanId?: string;
   nodes: GraphNode[];
   edges: GraphEdge[];
   onSelectFindingNode: (node: GraphNode) => void;
 }
 
 export const FindingsView: React.FC<FindingsViewProps> = ({
+  scanId,
   nodes,
   edges,
   onSelectFindingNode,
@@ -167,6 +172,29 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          {scanId && (
+            <div className="flex items-center gap-2 mr-2">
+              <a
+                href={getExportPdfUrl(scanId)}
+                download
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-semibold hover:bg-rose-500/25 transition-all shadow-sm"
+                title="Download Executive Summary PDF Report"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Export PDF</span>
+              </a>
+              <a
+                href={getExportSarifUrl(scanId)}
+                download
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-xs font-semibold hover:bg-indigo-500/25 transition-all shadow-sm"
+                title="Download OASIS SARIF v2.1.0 JSON"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export SARIF</span>
+              </a>
+            </div>
+          )}
+
           {/* Type Filter */}
           <div className="relative flex items-center">
             <Filter className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" />
@@ -280,9 +308,9 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
                     </span>
                   </td>
 
-                  {/* Flags */}
+                  {/* Flags & Standard Tags */}
                   <td className="p-3.5">
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {node.is_critical && (
                         <span className="p-1 rounded bg-rose-500/20 text-rose-400" title="Critical Bottleneck">
                           <Crown className="w-3.5 h-3.5" />
@@ -293,7 +321,26 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
                           <AlertTriangle className="w-3.5 h-3.5" />
                         </span>
                       )}
-                      {!node.is_critical && !node.undermined && (
+                      {node.properties?.cwe && (
+                        <span 
+                          className="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] font-mono flex items-center gap-0.5"
+                          title={node.properties.cwe_mapping === 'potential' ? 'Potential mapping' : 'CWE classification'}
+                        >
+                          <span>{node.properties.cwe}</span>
+                          {node.properties.cwe_mapping === 'potential' && (
+                            <span className="text-[9px] text-amber-400 italic">?</span>
+                          )}
+                        </span>
+                      )}
+                      {node.properties?.owasp && (
+                        <span 
+                          className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[10px] font-mono"
+                          title="OWASP Category"
+                        >
+                          {node.properties.owasp}
+                        </span>
+                      )}
+                      {!node.is_critical && !node.undermined && !node.properties?.cwe && !node.properties?.owasp && (
                         <span className="text-slate-600 font-mono text-[10px]">-</span>
                       )}
                     </div>

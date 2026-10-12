@@ -63,19 +63,31 @@ export const CustomEdge = memo(({
     ? confidence.toFixed(2) 
     : 'N/A';
 
-  // Semantic styles - solid dark background, 1px border, color by status, no glow band
+  const isAssetLayer = edgeData.layer === 'asset' || 
+    ['has_endpoint', 'runs_service'].includes(edgeData.relation_type.toLowerCase());
+
+  // Semantic styles - distinct visual treatment for asset layer vs attack layer
   let strokeColor = '#F59E0B'; // unverified amber
   let strokeDasharray: string | undefined = undefined;
   let pillBorder = 'border-amber-500/80';
   let pillText = 'text-amber-400';
   let opacity = 1;
 
-  if (status === 'verified') {
-    strokeColor = '#22C55E'; // green
+  if (isAssetLayer) {
+    // ASSET LAYER: Calm technical cyan/sky palette, subtle dash, infrastructure styling
+    strokeColor = '#38BDF8'; // sky blue
+    strokeDasharray = '4 4';
+    pillBorder = 'border-sky-500/60 bg-[#091528]';
+    pillText = 'text-sky-300';
+    opacity = 0.85;
+  } else if (status === 'verified') {
+    // ATTACK LAYER - VERIFIED: Green
+    strokeColor = '#22C55E';
     pillBorder = 'border-emerald-500/80';
     pillText = 'text-emerald-400';
   } else if (status === 'unverified') {
-    strokeColor = '#F59E0B'; // amber
+    // ATTACK LAYER - UNVERIFIED HYPOTHESIS: Amber
+    strokeColor = '#F59E0B';
     pillBorder = 'border-amber-500/80';
     pillText = 'text-amber-400';
     if (confidence !== null && confidence !== undefined) {
@@ -93,7 +105,7 @@ export const CustomEdge = memo(({
     pillText = 'text-pink-400';
   }
 
-  const markerId = `arrow-${status}-${id}`;
+  const markerId = `arrow-${isAssetLayer ? 'asset' : status}-${id}`;
 
   return (
     <>
@@ -118,7 +130,7 @@ export const CustomEdge = memo(({
         className="react-flow__edge-path transition-all duration-200"
         d={edgePath}
         stroke={strokeColor}
-        strokeWidth={selected ? 2.5 : 1.75}
+        strokeWidth={selected ? 2.5 : isAssetLayer ? 1.5 : 2.0}
         strokeDasharray={strokeDasharray}
         strokeOpacity={opacity}
         markerEnd={`url(#${markerId})`}
@@ -134,14 +146,19 @@ export const CustomEdge = memo(({
           className="nodrag nopan"
         >
           <div
-            title={fullRelationText}
-            className={`px-3 py-1 rounded-full border bg-[#0B0D1A] text-[11px] font-mono font-medium flex items-center gap-1.5 shadow-md cursor-pointer transition-all hover:scale-105 select-none ${pillBorder} ${pillText} ${
+            title={`${fullRelationText} (${isAssetLayer ? 'Asset Layer' : 'Attack Layer'})`}
+            className={`px-2.5 py-0.5 rounded-full border bg-[#0B0D1A] text-[10px] font-mono font-medium flex items-center gap-1.5 shadow-md cursor-pointer transition-all hover:scale-105 select-none ${pillBorder} ${pillText} ${
               selected ? 'ring-2 ring-indigo-500 shadow-indigo-500/20' : ''
             }`}
             style={{ opacity }}
           >
+            {isAssetLayer && (
+              <span className="px-1 py-0.2 rounded bg-sky-500/25 text-[8px] font-black text-sky-200 uppercase tracking-wider">
+                ASSET
+              </span>
+            )}
             <span title={fullRelationText}>{displayRelationText}</span>
-            <span className="px-1.5 py-0.5 rounded bg-white/10 font-bold text-[10px] text-slate-200">
+            <span className="px-1.5 py-0.5 rounded bg-white/10 font-bold text-[9px] text-slate-200">
               {confText}
             </span>
           </div>

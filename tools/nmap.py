@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 
-from db.models import Scan, Node, Evidence
+from db.models import Scan, Node, Evidence, Edge
 from tools.envelope import ToolOutputEnvelope
 
 def get_nmap_binary() -> Optional[str]:
@@ -50,6 +50,11 @@ def execute_nmap_scan(scan_id: str, db: Session) -> Dict[str, Any]:
         raise ValueError(f"Scan with ID '{scan_id}' not found")
 
     target_url = scan.target_url
+
+    from api.allowlist import allowlist_validator
+    if not allowlist_validator.is_target_allowed(target_url):
+        raise ValueError(f"Security Violation: Target '{target_url}' is not in the allowlist.")
+
     parsed = urlparse(target_url if "://" in target_url else f"http://{target_url}")
     host = parsed.hostname or "localhost"
     port = parsed.port or (443 if parsed.scheme == "https" else 80)
@@ -103,8 +108,26 @@ def execute_nmap_scan(scan_id: str, db: Session) -> Dict[str, Any]:
     db.add(evidence)
     db.flush()
 
-    # Create Node rows for discovered services
+    # Ensure root host node exists for scan
+    root_node = db.query(Node).filter(
+        Node.scan_id == scan.id,
+        Node.node_type == "host"
+    ).first()
+
+    if not root_node:
+        root_node = Node(
+            scan_id=scan.id,
+            label=scan.target_url,
+            node_type="host",
+            is_critical=False,
+            properties={"target_url": scan.target_url}
+        )
+        db.add(root_node)
+        db.flush()
+
+    # Create Node rows for discovered services and runs_service Edges from root host node
     created_nodes = []
+    created_edges = []
     for item in parsed_findings_list:
         service_str = item["service"]
         port_num = item["port"]
@@ -123,18 +146,46 @@ def execute_nmap_scan(scan_id: str, db: Session) -> Dict[str, Any]:
             }
         )
         db.add(node)
+        db.flush()
         created_nodes.append(node)
+
+        existing_edge = db.query(Edge).filter(
+            Edge.scan_id == scan.id,
+            Edge.source_node_id == root_node.id,
+            Edge.target_node_id == node.id,
+            Edge.relation_type == "runs_service"
+        ).first()
+
+        if not existing_edge:
+            edge = Edge(
+                scan_id=scan.id,
+                source_node_id=root_node.id,
+                target_node_id=node.id,
+                relation_type="runs_service",
+                layer="asset",
+                pattern_key="nmap_discovery",
+                confidence=1.0,
+                evidence_only_confidence=1.0,
+                status="verified",
+                verification_outcome=None,
+                reasoning=f"Nmap verified open port {port_num} ({service_str})"
+            )
+            db.add(edge)
+            created_edges.append(edge)
 
     scan.status = "NMAP_COMPLETED"
     db.commit()
     db.refresh(evidence)
     for n in created_nodes:
         db.refresh(n)
+    for e in created_edges:
+        db.refresh(e)
 
     return {
         "scan_id": scan.id,
         "evidence": evidence,
         "nodes": created_nodes,
+        "edges": created_edges,
         "envelope": envelope
     }
 

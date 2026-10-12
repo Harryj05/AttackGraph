@@ -53,13 +53,21 @@ http_probe_declaration = FunctionDeclaration(
 
 access_control_check_declaration = FunctionDeclaration(
     name="access_control_check",
-    description="Tests whether modifying an identifier in an endpoint URL reveals unauthorized user data (IDOR / BOLA check).",
+    description="Tests whether modifying an identifier in an endpoint URL reveals unauthorized user data (two-session IDOR / BOLA check using credential handles).",
     parameters=Schema(
         type=Type.OBJECT,
         properties={
             "node_id": Schema(
                 type=Type.STRING,
                 description="ID of the endpoint node with query parameter or path identifier."
+            ),
+            "user_a_handle": Schema(
+                type=Type.STRING,
+                description="Abstract credential handle for cross-session accessor (default 'user_a')."
+            ),
+            "user_b_handle": Schema(
+                type=Type.STRING,
+                description="Abstract credential handle for resource owner (default 'user_b')."
             )
         },
         required=["node_id"]

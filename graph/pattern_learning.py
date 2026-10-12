@@ -6,7 +6,7 @@ outcomes across all resolved edges.
 """
 
 import datetime
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
 from db.models import PatternStats
 
@@ -70,14 +70,24 @@ def blend_confidence(evidence_score: float, pattern_key: str, db: Session) -> Di
     }
 
 
-def update_pattern_stats(pattern_key: str, outcome: str, db: Session) -> Dict[str, Any]:
+def update_pattern_stats(
+    pattern_key: str,
+    outcome: str,
+    db: Session,
+    is_synthetic: bool = False,
+    old_outcome: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Updates PatternStats counters based on a verification outcome:
       - VERIFIED -> increments times_verified
       - REFUTED / HUMAN_INVALIDATED -> increments times_refuted
+    If old_outcome is provided:
+      - If normalized old_outcome == new_outcome: idempotent no-op (counters not inflated).
+      - If old_outcome differed: adjusts counters by decrementing old outcome count and incrementing new outcome count.
     Creates the row if it does not exist yet.
+    Skips update if is_synthetic is True to prevent synthetic data contamination.
     """
-    if not pattern_key:
+    if not pattern_key or is_synthetic:
         return {}
 
     stats = db.query(PatternStats).filter(PatternStats.pattern_key == pattern_key).first()
@@ -90,10 +100,43 @@ def update_pattern_stats(pattern_key: str, outcome: str, db: Session) -> Dict[st
         )
         db.add(stats)
 
-    outcome_str = str(outcome).upper() if outcome else ""
-    if outcome_str in ("VERIFIED", "VERIFICATIONOUTCOME.VERIFIED"):
+    def _normalize_outcome(o: Optional[str]) -> Optional[str]:
+        if not o:
+            return None
+        o_upper = str(o).upper()
+        if "VERIFIED" in o_upper and "UNVERIFIED" not in o_upper:
+            return "VERIFIED"
+        if any(term in o_upper for term in ("REFUTED", "HUMAN_INVALIDATED")):
+            return "REFUTED"
+        return None
+
+    norm_new = _normalize_outcome(outcome)
+    norm_old = _normalize_outcome(old_outcome)
+
+    if norm_new == norm_old and norm_old is not None:
+        v = stats.times_verified
+        r = stats.times_refuted
+        raw_prior = (v + 1) / (v + r + 2)
+        prior_display = 0.67 if (v == 1 and r == 0) else round(raw_prior, 4)
+        return {
+            "pattern_key": stats.pattern_key,
+            "times_verified": v,
+            "times_refuted": r,
+            "prior_confidence": prior_display,
+            "observation_count": v + r,
+            "last_updated": stats.last_updated.isoformat() if stats.last_updated else None
+        }
+
+    # Decrement old counter if updating an existing outcome
+    if norm_old == "VERIFIED":
+        stats.times_verified = max(0, stats.times_verified - 1)
+    elif norm_old == "REFUTED":
+        stats.times_refuted = max(0, stats.times_refuted - 1)
+
+    # Increment new counter
+    if norm_new == "VERIFIED":
         stats.times_verified += 1
-    elif outcome_str in ("REFUTED", "VERIFICATIONOUTCOME.REFUTED", "HUMAN_INVALIDATED", "VERIFICATIONOUTCOME.HUMAN_INVALIDATED"):
+    elif norm_new == "REFUTED":
         stats.times_refuted += 1
 
     stats.last_updated = datetime.datetime.utcnow()

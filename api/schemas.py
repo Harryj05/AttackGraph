@@ -9,6 +9,10 @@ class ScanResponse(BaseModel):
     id: str
     target_url: str
     status: str
+    node_count: Optional[int] = 0
+    edge_count: Optional[int] = 0
+    finding_count: Optional[int] = 0
+    provenance: Optional[str] = "live"
     created_at: datetime
     updated_at: datetime
 
@@ -19,6 +23,7 @@ class NodeCreate(BaseModel):
     label: str
     node_type: str
     is_critical: bool = False
+    is_synthetic: bool = False
     properties: Dict[str, Any] = {}
 
 class NodeResponse(BaseModel):
@@ -27,6 +32,7 @@ class NodeResponse(BaseModel):
     label: str
     node_type: str
     is_critical: bool
+    is_synthetic: bool = False
     properties: Dict[str, Any]
     created_at: datetime
 
@@ -37,12 +43,14 @@ class EdgeCreate(BaseModel):
     source_node_id: str
     target_node_id: str
     relation_type: str
+    layer: str = "attack"
     pattern_key: Optional[str] = None
     confidence: Optional[float] = None
     status: str = "unverified"
     verification_outcome: Optional[str] = None
     reasoning: Optional[str] = None
     step: Optional[int] = None
+    is_synthetic: bool = False
     properties: Dict[str, Any] = {}
 
 class EdgeResponse(BaseModel):
@@ -51,6 +59,7 @@ class EdgeResponse(BaseModel):
     source_node_id: str
     target_node_id: str
     relation_type: str
+    layer: str = "attack"
     pattern_key: Optional[str] = None
     confidence: Optional[float] = None
     evidence_only_confidence: Optional[float] = None
@@ -58,6 +67,7 @@ class EdgeResponse(BaseModel):
     verification_outcome: Optional[str] = None
     reasoning: Optional[str] = None
     step: Optional[int] = None
+    is_synthetic: bool = False
     properties: Dict[str, Any]
     created_at: datetime
 
@@ -71,6 +81,7 @@ class EvidenceResponse(BaseModel):
     tool_name: str
     raw_output: Optional[str] = None
     parsed_findings: Dict[str, Any]
+    is_synthetic: bool = False
     timestamp: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -79,6 +90,7 @@ class NmapScanResponse(BaseModel):
     scan_id: str
     evidence: EvidenceResponse
     nodes: List[NodeResponse]
+    edges: Optional[List[EdgeResponse]] = None
 
 class FfufScanResponse(BaseModel):
     scan_id: str
@@ -104,6 +116,9 @@ class ErrorResponse(BaseModel):
 class AccessControlCheckRequest(BaseModel):
     auth_token: Optional[str] = None
     session_cookies: Optional[Dict[str, str]] = None
+    token_a: Optional[str] = None
+    token_b: Optional[str] = None
+    resource_url: Optional[str] = None
 
 
 class AccessControlCheckResponse(BaseModel):
@@ -128,14 +143,17 @@ class ReflectedInputCheckResponse(BaseModel):
 
 class AgentRunRequest(BaseModel):
     max_steps: Optional[int] = 15
+    mode: Optional[str] = "agent"
 
 
 class AgentRunResponse(BaseModel):
     scan_id: str
+    mode: str = "agent"
     total_steps: int
     max_steps: int
     steps: List[Dict[str, Any]]
     final_state: Dict[str, Any]
+    metrics: Dict[str, Any] = {}
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -154,6 +172,7 @@ class GraphNodeResponse(BaseModel):
     node_type: str
     is_critical: bool
     undermined: bool = False
+    is_synthetic: bool = False
     properties: Dict[str, Any]
     evidence: List[EvidenceSummary] = []
     created_at: Optional[datetime] = None
@@ -171,6 +190,7 @@ class GraphEdgeResponse(BaseModel):
     status: str
     reasoning: Optional[str] = None
     pattern_key: Optional[str] = None
+    is_synthetic: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -209,6 +229,7 @@ class PathConfidenceResponse(BaseModel):
     node_ids: List[str]
     edge_confidences: List[float]
     path_confidence: float
+    weakest_link_confidence_index: float
     weakest_edge: Optional[WeakestEdgeSummary] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -315,6 +336,7 @@ class CalibrationBucketResponse(BaseModel):
 class CalibrationReportResponse(BaseModel):
     total_edges_with_outcome: int
     total_edges_unverified_excluded: int
+    total_edges_discovery_excluded: int = 0
     buckets: List[CalibrationBucketResponse]
     ece: Optional[float] = None
     brier_score: Optional[float] = None

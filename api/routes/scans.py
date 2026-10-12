@@ -36,6 +36,38 @@ from graph.calibration import compute_calibration
 
 router = APIRouter(prefix="/scans", tags=["scans"])
 
+def format_scan_response(scan: Scan) -> ScanResponse:
+    nodes = scan.nodes
+    edges = scan.edges
+    node_count = len(nodes)
+    edge_count = len(edges)
+    finding_count = sum(
+        1 for n in nodes if n.node_type in ('access_control_finding', 'reflected_input_finding', 'potential_secret', 'secret', 'vulnerability')
+    )
+    total_elements = node_count + edge_count
+    if total_elements == 0:
+        provenance = "live"
+    else:
+        synthetic_count = sum(1 for n in nodes if n.is_synthetic) + sum(1 for e in edges if e.is_synthetic)
+        if synthetic_count == 0:
+            provenance = "live"
+        elif synthetic_count == total_elements:
+            provenance = "constructed"
+        else:
+            provenance = "mixed"
+
+    return ScanResponse(
+        id=scan.id,
+        target_url=scan.target_url,
+        status=scan.status,
+        node_count=node_count,
+        edge_count=edge_count,
+        finding_count=finding_count,
+        provenance=provenance,
+        created_at=scan.created_at,
+        updated_at=scan.updated_at
+    )
+
 @router.post("", response_model=ScanResponse, status_code=status.HTTP_201_CREATED)
 def create_scan(scan_in: ScanCreate, db: Session = Depends(get_db)):
     """
@@ -58,7 +90,7 @@ def create_scan(scan_in: ScanCreate, db: Session = Depends(get_db)):
     db.add(scan)
     db.commit()
     db.refresh(scan)
-    return scan
+    return format_scan_response(scan)
 
 @router.get("", response_model=List[ScanResponse])
 def list_scans(db: Session = Depends(get_db)):
@@ -67,14 +99,14 @@ def list_scans(db: Session = Depends(get_db)):
     Returns list of all scan records sorted by created_at descending (newest first).
     """
     scans = db.query(Scan).order_by(Scan.created_at.desc()).all()
-    return scans
+    return [format_scan_response(s) for s in scans]
 
 @router.get("/{scan_id}", response_model=ScanResponse)
 def get_scan(scan_id: str, db: Session = Depends(get_db)):
     scan = db.query(Scan).filter(Scan.id == scan_id).first()
     if not scan:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scan not found")
-    return scan
+    return format_scan_response(scan)
 
 @router.get("/{scan_id}/agent-log", response_model=List[AgentLogResponse])
 def get_agent_log(scan_id: str, db: Session = Depends(get_db)):
@@ -162,10 +194,18 @@ def trigger_access_control_check(
     """
     auth_token = check_in.auth_token if check_in else None
     session_cookies = check_in.session_cookies if check_in else None
+    token_a = check_in.token_a if check_in else None
+    token_b = check_in.token_b if check_in else None
+    resource_url = check_in.resource_url if check_in else None
 
     try:
         result = execute_access_control_check(
-            scan_id, node_id, db, session_cookies=session_cookies, auth_token=auth_token
+            scan_id, node_id, db,
+            session_cookies=session_cookies,
+            auth_token=auth_token,
+            token_a=token_a,
+            token_b=token_b,
+            resource_url=resource_url
         )
         return result
     except ValueError as e:
@@ -203,17 +243,24 @@ def trigger_agent_run(
     scan_id: str,
     run_in: Optional[AgentRunRequest] = None,
     max_steps: Optional[int] = None,
+    mode: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     """
     POST /scans/{scan_id}/agent/run
-    Triggers the autonomous LLM function-calling agent decision loop for the scan.
-    Accepts max_steps in JSON body or query parameter (defaults to 15).
+    Triggers either the autonomous LLM function-calling agent decision loop
+    or the deterministic fixed scanning pipeline for the scan.
+    Accepts max_steps and mode ("agent" or "deterministic") in JSON body or query parameters.
     """
     steps_limit = max_steps if max_steps is not None else (run_in.max_steps if run_in and run_in.max_steps is not None else 15)
+    selected_mode = mode or (run_in.mode if run_in and run_in.mode else "agent")
 
     try:
-        result = run_agent_loop(scan_id, db, max_steps=steps_limit)
+        if selected_mode.lower() == "deterministic":
+            from agent.deterministic import run_deterministic_pipeline
+            result = run_deterministic_pipeline(scan_id, db, max_steps=steps_limit)
+        else:
+            result = run_agent_loop(scan_id, db, max_steps=steps_limit)
         return result
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -253,6 +300,7 @@ def get_scan_graph(scan_id: str, db: Session = Depends(get_db)):
                 node_type=node.node_type,
                 is_critical=node.is_critical,
                 undermined=node.undermined,
+                is_synthetic=node.is_synthetic,
                 properties=node.properties or {},
                 evidence=evidence_summaries,
                 created_at=node.created_at
@@ -269,7 +317,8 @@ def get_scan_graph(scan_id: str, db: Session = Depends(get_db)):
             evidence_only_confidence=edge.evidence_only_confidence,
             status=edge.status,
             reasoning=edge.reasoning,
-            pattern_key=edge.pattern_key
+            pattern_key=edge.pattern_key,
+            is_synthetic=edge.is_synthetic
         )
         for edge in edges
     ]
@@ -330,6 +379,7 @@ def get_scan_replay(scan_id: str, db: Session = Depends(get_db)):
             node_type=node.node_type,
             is_critical=node.is_critical,
             undermined=node.undermined,
+            is_synthetic=node.is_synthetic,
             properties=node.properties or {},
             evidence=evidence_summaries
         ).model_dump()
@@ -356,7 +406,8 @@ def get_scan_replay(scan_id: str, db: Session = Depends(get_db)):
             evidence_only_confidence=edge.evidence_only_confidence,
             status=edge.status,
             reasoning=edge.reasoning,
-            pattern_key=edge.pattern_key
+            pattern_key=edge.pattern_key,
+            is_synthetic=edge.is_synthetic
         ).model_dump()
 
         step_num = find_step_number(edge.created_at, explicit_step=edge.step)
@@ -436,6 +487,7 @@ def get_node_path_confidence(scan_id: str, node_id: str, db: Session = Depends(g
                 "node_ids": [node.id],
                 "edge_confidences": [],
                 "path_confidence": 1.0,
+                "weakest_link_confidence_index": 1.0,
                 "weakest_edge": None
             })
 
@@ -522,6 +574,8 @@ def trigger_human_edge_review(
     reviewer_name = review_in.reviewer or "human_reviewer"
     review_reason = review_in.reason or "No reason provided"
 
+    old_outcome = edge.verification_outcome or (edge.status if edge.status in ("verified", "refuted", "human_invalidated") else None)
+
     propagation_res = None
     if decision_norm == "confirm":
         edge.status = "verified"
@@ -543,9 +597,15 @@ def trigger_human_edge_review(
     db.add(correction)
 
     # Note: pattern_stats reflects a clean "going forward" learning record, not retroactively inferred history, since historical edges may contain test artifacts or repeated trial outcomes.
-    if edge.pattern_key:
+    if edge.pattern_key and not getattr(edge, "is_synthetic", False):
         from graph.pattern_learning import update_pattern_stats
-        update_pattern_stats(edge.pattern_key, edge.verification_outcome, db)
+        update_pattern_stats(
+            edge.pattern_key,
+            edge.verification_outcome,
+            db,
+            is_synthetic=getattr(edge, "is_synthetic", False),
+            old_outcome=old_outcome
+        )
 
     db.commit()
     db.refresh(edge)
@@ -616,7 +676,7 @@ def get_critical_node(scan_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{scan_id}/calibration", response_model=CalibrationReportResponse)
-def get_scan_calibration(scan_id: str, db: Session = Depends(get_db)):
+def get_scan_calibration(scan_id: str, include_synthetic: bool = False, db: Session = Depends(get_db)):
     """
     GET /scans/{scan_id}/calibration
     Single-scan-scoped offline calibration report (Section 11.5 / Section 22).
@@ -629,8 +689,64 @@ def get_scan_calibration(scan_id: str, db: Session = Depends(get_db)):
             detail=f"Scan with ID '{scan_id}' not found."
         )
 
-    report = compute_calibration(db, scan_ids=[scan_id])
+    report = compute_calibration(db, scan_ids=[scan_id], include_synthetic=include_synthetic)
     return report
+
+
+@router.get("/{scan_id}/export/sarif")
+@router.get("/{scan_id}/report/sarif")
+def export_scan_sarif_report(scan_id: str, db: Session = Depends(get_db)):
+    """
+    GET /scans/{scan_id}/export/sarif
+    GET /scans/{scan_id}/report/sarif (alias)
+    Exports scan findings and diagnostic results conforming to SARIF v2.1.0 JSON format.
+    Includes verification state, redacted evidence, CWE/OWASP tags, and limitations.
+    """
+    from fastapi.responses import JSONResponse
+    from reports.export import generate_sarif_report
+
+    scan = db.query(Scan).filter(Scan.id == scan_id).first()
+    if not scan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scan with ID '{scan_id}' not found."
+        )
+
+    sarif_doc = generate_sarif_report(scan_id, db)
+    filename = f"attackgraph_scan_{scan_id[:8]}.sarif"
+    return JSONResponse(
+        content=sarif_doc,
+        media_type="application/sarif+json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+
+@router.get("/{scan_id}/export/pdf")
+@router.get("/{scan_id}/report/pdf")
+def export_scan_pdf_report(scan_id: str, db: Session = Depends(get_db)):
+    """
+    GET /scans/{scan_id}/export/pdf
+    GET /scans/{scan_id}/report/pdf (alias)
+    Generates and downloads executive summary PDF security assessment report.
+    Contains findings table, redacted evidence snippets, and scope boundaries.
+    """
+    from fastapi.responses import Response
+    from reports.export import generate_pdf_report
+
+    scan = db.query(Scan).filter(Scan.id == scan_id).first()
+    if not scan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scan with ID '{scan_id}' not found."
+        )
+
+    pdf_bytes = generate_pdf_report(scan_id, db)
+    filename = f"attackgraph_scan_{scan_id[:8]}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
 
 
 

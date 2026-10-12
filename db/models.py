@@ -34,6 +34,7 @@ class Node(Base):
     node_type = Column(String(100), nullable=False) # e.g., service, vulnerability, credential, asset
     is_critical = Column(Boolean, default=False, nullable=False) # Section 15/16 critical node analysis
     undermined = Column(Boolean, default=False, nullable=False) # Section 13 human-correction propagation
+    is_synthetic = Column(Boolean, default=False, nullable=False)
     properties = Column(JSON, default=dict)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -51,6 +52,7 @@ class Edge(Base):
     source_node_id = Column(String(36), ForeignKey("nodes.id"), nullable=False)
     target_node_id = Column(String(36), ForeignKey("nodes.id"), nullable=False)
     relation_type = Column(String(100), nullable=False) # e.g., EXPLOITS, HAS_VULNERABILITY, LEADS_TO
+    layer = Column(String(50), nullable=False, default="attack") # "asset" (has_endpoint, runs_service) or "attack" (vulnerability, transitions)
     pattern_key = Column(String(255), nullable=True, index=True) # Section 16 spec: pattern matching & stats
     confidence = Column(Float, nullable=True) # Section 11.2/11.6 path confidence score (blended final confidence)
     evidence_only_confidence = Column(Float, nullable=True) # Section 34.6 unblended raw evidence score
@@ -58,8 +60,15 @@ class Edge(Base):
     verification_outcome = Column(String(100), nullable=True) # Section 34 pattern learning
     reasoning = Column(Text, nullable=True) # LLM justification
     step = Column(Integer, nullable=True) # agent step index
+    is_synthetic = Column(Boolean, default=False, nullable=False)
     properties = Column(JSON, default=dict)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    def __init__(self, **kwargs):
+        if "layer" not in kwargs:
+            rel = str(kwargs.get("relation_type", "")).lower()
+            kwargs["layer"] = "asset" if rel in ("has_endpoint", "runs_service") else "attack"
+        super().__init__(**kwargs)
 
     scan = relationship("Scan", back_populates="edges")
     source_node = relationship("Node", foreign_keys=[source_node_id], back_populates="source_edges")
@@ -77,6 +86,7 @@ class Evidence(Base):
     tool_name = Column(String(100), nullable=False)
     raw_output = Column(Text, nullable=True)
     parsed_findings = Column(JSON, default=dict)
+    is_synthetic = Column(Boolean, default=False, nullable=False)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
 
     scan = relationship("Scan", back_populates="evidence")

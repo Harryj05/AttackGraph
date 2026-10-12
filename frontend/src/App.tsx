@@ -24,6 +24,8 @@ export function App() {
   const [showRefuted, setShowRefuted] = useState<boolean>(false);
   const [isRunningAgent, setIsRunningAgent] = useState<boolean>(false);
   const [agentStatusToast, setAgentStatusToast] = useState<string | null>(null);
+  const [scanMode, setScanMode] = useState<'agent' | 'deterministic'>('agent');
+  const [lastRunMetrics, setLastRunMetrics] = useState<any>(null);
 
   // Replay Mode State
   const [isReplayMode, setIsReplayMode] = useState<boolean>(false);
@@ -221,7 +223,10 @@ export function App() {
     }, 3000);
 
     try {
-      await runAgent(targetScanId, 15);
+      const runRes = await runAgent(targetScanId, 15, scanMode);
+      if (runRes && runRes.metrics) {
+        setLastRunMetrics(runRes.metrics);
+      }
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
@@ -319,9 +324,15 @@ export function App() {
               agentLogs={agentLogs}
               loading={loadingLogs}
               onSelectStepForReplay={handleSelectStepForReplay}
+              scanMode={scanMode}
+              onChangeScanMode={setScanMode}
+              onRunScan={handleRunAgent}
+              isRunningScan={isRunningAgent}
+              lastRunMetrics={lastRunMetrics}
             />
           ) : currentView === 'findings' ? (
             <FindingsView
+              scanId={selectedScanId}
               nodes={graphData?.nodes || []}
               edges={graphData?.edges || []}
               onSelectFindingNode={(node) => {

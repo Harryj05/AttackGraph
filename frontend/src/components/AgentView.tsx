@@ -11,19 +11,31 @@ import {
   Copy,
   Check,
   Zap,
-  Filter
+  Filter,
+  Cpu,
+  Play
 } from 'lucide-react';
 
 interface AgentViewProps {
   agentLogs: AgentLog[];
   loading: boolean;
   onSelectStepForReplay?: (stepNumber: number) => void;
+  scanMode?: 'agent' | 'deterministic';
+  onChangeScanMode?: (mode: 'agent' | 'deterministic') => void;
+  onRunScan?: () => void;
+  isRunningScan?: boolean;
+  lastRunMetrics?: any;
 }
 
 export const AgentView: React.FC<AgentViewProps> = ({
   agentLogs,
   loading,
   onSelectStepForReplay,
+  scanMode = 'agent',
+  onChangeScanMode,
+  onRunScan,
+  isRunningScan = false,
+  lastRunMetrics,
 }) => {
   const [filterMode, setFilterMode] = useState<string>('ALL');
   const [expandedLogIds, setExpandedLogIds] = useState<Set<string>>(new Set());
@@ -117,17 +129,120 @@ export const AgentView: React.FC<AgentViewProps> = ({
     );
   }
 
+  const renderModeControls = () => (
+    <div className="bg-[#12152A] border border-[#ffffff14] rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
+      <div className="flex items-center gap-3">
+        <span className="text-xs font-mono text-slate-400 font-semibold uppercase tracking-wider">Scan Mode:</span>
+        <div className="flex bg-[#0B0D1A] p-1 rounded-xl border border-[#ffffff14]">
+          <button
+            onClick={() => onChangeScanMode && onChangeScanMode('agent')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono flex items-center gap-2 transition-all cursor-pointer ${
+              scanMode === 'agent'
+                ? 'bg-[#6366F1] text-white font-bold shadow'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Bot className="w-3.5 h-3.5" />
+            Agent (Gemini LLM Loop)
+          </button>
+          <button
+            onClick={() => onChangeScanMode && onChangeScanMode('deterministic')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono flex items-center gap-2 transition-all cursor-pointer ${
+              scanMode === 'deterministic'
+                ? 'bg-emerald-600 text-white font-bold shadow'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Cpu className="w-3.5 h-3.5" />
+            Deterministic (Fixed Pipeline)
+          </button>
+        </div>
+      </div>
+
+      {onRunScan && (
+        <button
+          onClick={onRunScan}
+          disabled={isRunningScan}
+          className={`px-4 py-2 rounded-xl text-xs font-mono flex items-center gap-2 transition-all cursor-pointer shadow-md ${
+            isRunningScan
+              ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+              : scanMode === 'deterministic'
+              ? 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold'
+              : 'bg-[#6366F1] hover:bg-[#4F46E5] text-white font-bold'
+          }`}
+        >
+          {isRunningScan ? (
+            <>
+              <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              Running {scanMode}...
+            </>
+          ) : (
+            <>
+              <Play className="w-3.5 h-3.5 fill-current" />
+              Run Scan ({scanMode.toUpperCase()})
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  );
+
+  const renderMetricsCard = () => {
+    if (!lastRunMetrics) return null;
+    return (
+      <div className="bg-[#12152A] border border-[#ffffff14] rounded-2xl p-4 shadow-md">
+        <div className="flex items-center justify-between pb-3 border-b border-[#ffffff0f]">
+          <span className="text-xs font-mono font-bold text-slate-300 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-amber-400" />
+            Latest Run Telemetry ({lastRunMetrics.mode || scanMode})
+          </span>
+          <span className="text-xs font-mono text-slate-400">
+            Wall-clock: <strong className="text-slate-200">{lastRunMetrics.wall_clock_time}s</strong>
+          </span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 text-xs font-mono">
+          <div className="bg-[#0B0D1A] p-2.5 rounded-xl border border-[#ffffff0f]">
+            <span className="text-slate-400 block text-[11px]">Valid Findings</span>
+            <span className="text-emerald-400 font-bold text-sm">{lastRunMetrics.valid_findings ?? 0}</span>
+          </div>
+          <div className="bg-[#0B0D1A] p-2.5 rounded-xl border border-[#ffffff0f]">
+            <span className="text-slate-400 block text-[11px]">False Positives</span>
+            <span className="text-rose-400 font-bold text-sm">{lastRunMetrics.false_positives ?? 0}</span>
+          </div>
+          <div className="bg-[#0B0D1A] p-2.5 rounded-xl border border-[#ffffff0f]">
+            <span className="text-slate-400 block text-[11px]">Token Usage / Cost</span>
+            <span className="text-indigo-400 font-bold text-sm">
+              {lastRunMetrics.token_usage?.total_tokens ?? 0} tkns (${(lastRunMetrics.estimated_cost ?? 0).toFixed(4)})
+            </span>
+          </div>
+          <div className="bg-[#0B0D1A] p-2.5 rounded-xl border border-[#ffffff0f]">
+            <span className="text-slate-400 block text-[11px]">Refusals / Rejections</span>
+            <span className="text-amber-400 font-bold text-sm">
+              {lastRunMetrics.refusals ?? 0} ref / {lastRunMetrics.guardrail_rejections ?? 0} rej
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (agentLogs.length === 0) {
     return (
-      <div className="flex-1 bg-[#0B0D1A] flex flex-col items-center justify-center text-slate-400 gap-3 p-12 select-none">
-        <Bot className="w-12 h-12 text-indigo-400/40 stroke-[1.5]" />
-        <span className="text-sm font-mono">No agent activity yet. Run the agent.</span>
+      <div className="flex-1 bg-[#0B0D1A] flex flex-col p-6 space-y-6 select-none font-sans text-slate-200">
+        {renderModeControls()}
+        {renderMetricsCard()}
+        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-3 py-16">
+          <Bot className="w-12 h-12 text-indigo-400/40 stroke-[1.5]" />
+          <span className="text-sm font-mono">No scan activity logged yet for this scan. Select mode and run above.</span>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex-1 bg-[#0B0D1A] flex flex-col overflow-y-auto p-6 space-y-6 select-none font-sans text-slate-200">
+      {renderModeControls()}
+      {renderMetricsCard()}
       {/* 1. Summary Header & Filter Bar */}
       <div className="bg-[#12152A] border border-[#ffffff14] rounded-2xl p-5 space-y-4 shadow-xl">
         <div className="flex items-center justify-between">

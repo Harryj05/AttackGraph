@@ -10,18 +10,31 @@ from sqlalchemy.orm import Session
 from db.models import Edge, Scan
 
 
-def compute_calibration(db: Session, scan_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+DISCOVERY_RELATION_TYPES = {
+    "has_endpoint",
+    "runs_service",
+    "nmap_discovery",
+    "service_discovery",
+}
+
+DISCOVERY_PATTERN_KEYS = {
+    "ffuf_discovery",
+    "nmap_discovery",
+    "has_endpoint",
+    "ffuf:endpoint_discovered",
+}
+
+
+def compute_calibration(db: Session, scan_ids: Optional[List[str]] = None, include_synthetic: bool = False) -> Dict[str, Any]:
     """
     Computes confidence calibration metrics across edges with known verification outcomes.
-
-    BINARY CORRECTNESS MAPPING RATIONALE:
-    - VERIFIED -> 1 (correct): The AI-proposed edge was verified by automated check or human auditor.
-    - REFUTED -> 0 (incorrect): The AI-proposed edge was refuted by re-verification.
-    - HUMAN_INVALIDATED -> 0 (incorrect): A human auditor invalidated the edge. Consistent with Section 34.7,
-      human invalidation indicates the proposed relationship was incorrect, providing a refutation-equivalent
-      ground truth signal for calibration and pattern learning.
+    Excludes asset/network discovery edges (has_endpoint, nmap/ffuf discovery) so that
+    calibration measures only genuine vulnerability and hypothesis edges.
     """
     query = db.query(Edge)
+
+    if not include_synthetic:
+        query = query.filter(Edge.is_synthetic == False)
 
     if scan_ids is not None:
         query = query.filter(Edge.scan_id.in_(scan_ids))
@@ -30,18 +43,27 @@ def compute_calibration(db: Session, scan_ids: Optional[List[str]] = None) -> Di
 
     evaluated_edges = []
     unverified_count = 0
+    discovery_count = 0
 
     for edge in all_edges:
+        rel_type = (edge.relation_type or "").strip().lower()
+        pat_key = (edge.pattern_key or "").strip().lower()
+
+        # Exclude discovery edges from calibration scoring
+        if rel_type in DISCOVERY_RELATION_TYPES or pat_key in DISCOVERY_PATTERN_KEYS:
+            discovery_count += 1
+            continue
+
         outcome = (edge.verification_outcome or edge.status or "").strip().upper()
-        
+
         # Filter for resolved edges with actual ground truth
         if outcome in ["VERIFIED", "REFUTED", "HUMAN_INVALIDATED"]:
             # Map outcome to binary label: 1 for VERIFIED, 0 for REFUTED / HUMAN_INVALIDATED
             binary_label = 1 if outcome == "VERIFIED" else 0
-            
+
             # Stored confidence value at creation (default 0.5 if missing)
             confidence = float(edge.confidence) if edge.confidence is not None else 0.5
-            
+
             evaluated_edges.append({
                 "edge_id": edge.id,
                 "scan_id": edge.scan_id,
@@ -119,6 +141,7 @@ def compute_calibration(db: Session, scan_ids: Optional[List[str]] = None) -> Di
     return {
         "total_edges_with_outcome": total_evaluated,
         "total_edges_unverified_excluded": unverified_count,
+        "total_edges_discovery_excluded": discovery_count,
         "buckets": buckets_output,
         "ece": ece,
         "brier_score": brier_score,

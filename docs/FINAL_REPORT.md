@@ -112,3 +112,20 @@ graph TD
         API --> PostgresDB[("PostgreSQL Database (attackgraph-postgres)")]
     end
 ```
+
+---
+
+## 7. Known System Limitations
+
+1. **Autonomous Agent Auth Token Limitation:**
+   - The autonomous agent function-calling loop (`agent/loop.py`) dispatches `access_control_check` without supplying an authentication token (`auth_token=None`).
+   - Consequently, the unauthenticated live agent cannot autonomously exploit or verify authenticated endpoints like OWASP Juice Shop's basket IDOR (`/rest/basket/{id}`).
+   - Proving or discovering the Juice Shop IDOR requires a manually authenticated call (or reverification request) passing an explicit JWT session token, as established in Phases 7 and 12.
+
+2. **Agent Log Run Grouping:**
+   - The database schema for `agent_log` records does not maintain an isolated `run_id` across distinct invocations of the agent loop on a single scan.
+   - When multiple agent executions occur against the same scan, step numbers restart from 1 for each execution. Querying `GET /scans/{scan_id}/agent-log` ordered by `step_number` interleaves steps from distinct runs rather than rendering them as isolated execution sessions.
+
+3. **Sample Size for Calibration:**
+   - Offline ECE and Brier score evaluation reflects an illustrative sample size ($N < 30$) given the controlled volume of real target container scans.
+

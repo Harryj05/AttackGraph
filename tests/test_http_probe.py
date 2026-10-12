@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -36,6 +37,12 @@ app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
 def test_http_probe_real_container_juiceshop():
+    import httpx
+    try:
+        httpx.get("http://localhost:3000", timeout=1.0)
+    except Exception:
+        pytest.skip("Juice Shop container is offline")
+
     # 1. Create scan & run ffuf for Juice Shop
     scan_resp = client.post("/scans", json={"target_url": "http://localhost:3000"})
     scan_id = scan_resp.json()["id"]
@@ -63,6 +70,12 @@ def test_http_probe_real_container_juiceshop():
     assert "User-agent: *" in raw_output or "Disallow:" in raw_output
 
 def test_http_probe_real_container_dvwa():
+    import httpx
+    try:
+        httpx.get("http://localhost:8080", timeout=1.0)
+    except Exception:
+        pytest.skip("DVWA container is offline")
+
     # 1. Create scan & run ffuf for DVWA
     scan_resp = client.post("/scans", json={"target_url": "http://localhost:8080"})
     scan_id = scan_resp.json()["id"]
@@ -103,3 +116,39 @@ def test_http_probe_cross_scan_rejection():
     # Must return HTTP 403 Forbidden with Security Violation
     assert probe_resp.status_code == 403
     assert "Security Violation" in probe_resp.json()["detail"]
+
+
+@patch("tools.http_probe.httpx.Client")
+def test_http_probe_secret_node_is_critical_false(mock_httpx_client):
+    """
+    Item 4: Secret nodes created by http_probe must NOT hardcode is_critical=True.
+    Criticality must only be determined by critical-node analysis.
+    """
+    import httpx
+    from unittest.mock import MagicMock
+    from tools.http_probe import execute_http_probe
+    from db.models import Node, Scan
+
+    db = TestingSessionLocal()
+    scan = Scan(target_url="http://localhost:3000", status="INITIALIZED")
+    db.add(scan)
+    db.commit()
+
+    node = Node(scan_id=scan.id, label="Endpoint /api", node_type="endpoint", properties={"path": "/api"})
+    db.add(node)
+    db.commit()
+
+    mock_client_instance = MagicMock()
+    mock_httpx_client.return_value.__enter__.return_value = mock_client_instance
+    k_prefix = "AKIA"
+    mock_client_instance.get.return_value = httpx.Response(
+        200,
+        text=f'{{"aws_key": "{k_prefix}1234567890ABCDEF"}}'
+    )
+
+    res = execute_http_probe(scan.id, node.id, db)
+    assert res["detected_secrets"] == 1
+
+    secret_node = db.query(Node).filter(Node.scan_id == scan.id, Node.node_type == "potential_secret").first()
+    assert secret_node is not None
+    assert secret_node.is_critical is False

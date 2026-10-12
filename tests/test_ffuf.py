@@ -41,6 +41,15 @@ def test_ffuf_scan_nonexistent_scan_id():
     assert "not found" in response.json()["detail"]
 
 def test_ffuf_scan_real_container_juiceshop():
+    import httpx
+    from tools.ffuf import get_ffuf_binary
+    if not get_ffuf_binary():
+        pytest.skip("ffuf binary not installed")
+    try:
+        httpx.get("http://localhost:3000", timeout=1.0)
+    except Exception:
+        pytest.skip("Juice Shop container is offline")
+
     # 1. Create scan for Juice Shop
     scan_resp = client.post("/scans", json={"target_url": "http://localhost:3000"})
     assert scan_resp.status_code == 201
@@ -67,6 +76,15 @@ def test_ffuf_scan_real_container_juiceshop():
 
 
 def test_ffuf_scan_real_container_dvwa():
+    import httpx
+    from tools.ffuf import get_ffuf_binary
+    if not get_ffuf_binary():
+        pytest.skip("ffuf binary not installed")
+    try:
+        httpx.get("http://localhost:8080", timeout=1.0)
+    except Exception:
+        pytest.skip("DVWA container is offline")
+
     # 1. Create scan for DVWA
     scan_resp = client.post("/scans", json={"target_url": "http://localhost:8080"})
     assert scan_resp.status_code == 201

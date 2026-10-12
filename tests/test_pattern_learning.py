@@ -111,6 +111,28 @@ def test_update_pattern_stats_counters(db_session):
     assert stats3["observation_count"] == 3
 
 
+def test_update_pattern_stats_idempotence(db_session):
+    p_key = "test_idempotence"
+
+    # First resolution: VERIFIED
+    stats1 = update_pattern_stats(p_key, "VERIFIED", db_session, old_outcome=None)
+    assert stats1["times_verified"] == 1
+    assert stats1["times_refuted"] == 0
+    assert stats1["observation_count"] == 1
+
+    # Same resolution repeated (e.g. user re-verifies or reviews with same outcome)
+    stats2 = update_pattern_stats(p_key, "VERIFIED", db_session, old_outcome="VERIFIED")
+    assert stats2["times_verified"] == 1
+    assert stats2["times_refuted"] == 0
+    assert stats2["observation_count"] == 1  # Must NOT inflate!
+
+    # Flipped resolution (e.g. from VERIFIED to REFUTED)
+    stats3 = update_pattern_stats(p_key, "REFUTED", db_session, old_outcome="VERIFIED")
+    assert stats3["times_verified"] == 0
+    assert stats3["times_refuted"] == 1
+    assert stats3["observation_count"] == 1  # Total count unchanged, delta applied!
+
+
 @patch("tools.access_control_check.httpx.Client")
 def test_pattern_learning_integration_sequence(mock_httpx_client, db_session):
     """
@@ -118,19 +140,19 @@ def test_pattern_learning_integration_sequence(mock_httpx_client, db_session):
     resolve the first (HUMAN_INVALIDATED), confirm the SECOND edge's confidence
     calculation reflects the updated prior.
     """
-    scan = Scan(target_url="http://testapp.com")
+    scan = Scan(target_url="http://localhost:3000")
     db_session.add(scan)
     db_session.commit()
 
-    node1 = Node(scan_id=scan.id, label="Endpoint 1", node_type="endpoint", properties={"url": "http://testapp.com/api/user?id=1"})
-    node2 = Node(scan_id=scan.id, label="Endpoint 2", node_type="endpoint", properties={"url": "http://testapp.com/api/order?id=10"})
+    node1 = Node(scan_id=scan.id, label="Endpoint 1", node_type="endpoint", properties={"url": "http://localhost:3000/api/user?id=1"})
+    node2 = Node(scan_id=scan.id, label="Endpoint 2", node_type="endpoint", properties={"url": "http://localhost:3000/api/order?id=10"})
     db_session.add_all([node1, node2])
     db_session.commit()
 
     mock_client_instance = MagicMock()
     mock_httpx_client.return_value.__enter__.return_value = mock_client_instance
 
-    req = httpx.Request("GET", "http://testapp.com/api/user?id=1")
+    req = httpx.Request("GET", "http://localhost:3000/api/user?id=1")
     mock_client_instance.get.side_effect = [
         httpx.Response(200, text='{"id": 1, "name": "alice"}', request=req),
         httpx.Response(200, text='{"id": 2, "name": "bob"}', request=req),

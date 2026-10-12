@@ -28,6 +28,7 @@ export interface GraphEdge {
   source_node_id: string;
   target_node_id: string;
   relation_type: string;
+  layer?: 'asset' | 'attack' | string;
   confidence?: number | null;
   evidence_only_confidence?: number | null;
   status: 'unverified' | 'verified' | 'refuted' | 'human_invalidated' | string;

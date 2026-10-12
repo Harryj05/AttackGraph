@@ -283,9 +283,8 @@ def test_agent_step_handles_api_exception(mock_client_cls, mock_sleep):
     assert step_res["stop"] is True
     assert "503 Service Unavailable" in step_res["reason"]
 
-    # Verify retry attempts
+    # Verify fallback attempts across models
     assert mock_client_instance.models.generate_content.call_count == 3
-    assert mock_sleep.call_count == 2
 
     # Verify AgentLog entry
     log = db.query(AgentLog).filter(AgentLog.scan_id == scan.id).first()
@@ -309,9 +308,9 @@ def test_agent_step_configures_http_timeout(mock_client_cls):
 
     execute_agent_step(scan.id, db, step_number=1)
 
-    # Verify genai.Client was instantiated with http_options timeout
+    # Verify genai.Client was instantiated with http_options timeout (15000 ms)
     _, kwargs = mock_client_cls.call_args
     assert "http_options" in kwargs
-    assert kwargs["http_options"].client_args == {"timeout": 30.0}
+    assert kwargs["http_options"].timeout == 15000
 
 

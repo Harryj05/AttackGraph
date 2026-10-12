@@ -114,6 +114,8 @@ def reverify_edge(
             "reason": f"Pattern key '{pattern_key}' is not eligible for automatic re-verification."
         }
 
+    old_outcome = edge.verification_outcome or (edge.status if edge.status in ("verified", "refuted", "human_invalidated") else None)
+
     if still_valid:
         edge.status = "verified"
         edge.verification_outcome = "VERIFIED"
@@ -122,9 +124,15 @@ def reverify_edge(
         edge.verification_outcome = "REFUTED"
 
     # Note: pattern_stats reflects a clean "going forward" learning record, not retroactively inferred history, since historical edges may contain test artifacts or repeated trial outcomes.
-    if edge.pattern_key:
+    if edge.pattern_key and not getattr(edge, "is_synthetic", False):
         from graph.pattern_learning import update_pattern_stats
-        update_pattern_stats(edge.pattern_key, edge.verification_outcome, db)
+        update_pattern_stats(
+            edge.pattern_key,
+            edge.verification_outcome,
+            db,
+            is_synthetic=getattr(edge, "is_synthetic", False),
+            old_outcome=old_outcome
+        )
 
     evidence = Evidence(
         scan_id=edge.scan_id,

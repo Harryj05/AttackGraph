@@ -1,0 +1,592 @@
+# eval/cases.yaml
+# AttackGraph AI - Evaluation Test Suite v2 (36 Cases)
+# Ground truth rationales documented BEFORE suite execution.
+#
+# Structural Validation Rule for Secrets:
+# Regex pattern matches produce state HYPOTHESIS by default.
+# Only secrets whose internal structure can be decoded and verified offline
+# (e.g., JWT header/payload base64url decode into valid JSON objects with 'alg' or 'typ')
+# are promoted to CONFIRMED. Unvalidated regex matches (e.g. AWS access key ID format,
+# database URLs, API key assignments) remain HYPOTHESIS until actively verified.
+
+cases:
+  # ============================================================================
+  # Reflected Input Check (12 Cases: 7 Live, 3 Unit, 2 Limitations)
+  # ============================================================================
+  - id: "dvwa-reflected-xss-low"
+    suite: "live"
+    target: "http://localhost:8080"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/vulnerabilities/xss_r/?name=test"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "dvwa"
+      security_level: "low"
+    expected_outcome: "HYPOTHESIS"
+    expected_evidence_substring: "POTENTIAL_EXECUTABLE_CONTEXT"
+    expected_limitation: false
+    rationale: "DVWA low security reflects unencoded HTML control characters (<, >, \", ') directly into response body, creating potential executable HTML context."
+
+  - id: "dvwa-reflected-xss-medium"
+    suite: "live"
+    target: "http://localhost:8080"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/vulnerabilities/xss_r/?name=test"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "dvwa"
+      security_level: "medium"
+    expected_outcome: "HYPOTHESIS"
+    expected_evidence_substring: "POTENTIAL_EXECUTABLE_CONTEXT"
+    expected_limitation: false
+    rationale: "DVWA medium only strips literal <script> tags; double and single quotes survive unencoded in HTML body, allowing attribute and event injection."
+
+  - id: "dvwa-reflected-xss-impossible"
+    suite: "live"
+    target: "http://localhost:8080"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/vulnerabilities/xss_r/?name=test"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "dvwa"
+      security_level: "impossible"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "ENCODED_SAFE"
+    expected_limitation: false
+    rationale: "DVWA impossible encodes all HTML control characters via htmlspecialchars(ENT_QUOTES) and requires Anti-CSRF token."
+
+  - id: "juiceshop-reflected-search-negative"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/rest/products/search?q=test"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "ABSENT"
+    expected_limitation: false
+    rationale: "Juice Shop search API returns a JSON array of matching product objects; the canary parameter is absent from response body."
+
+  - id: "juiceshop-track-order-encoded"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/rest/track-order/test?orderId=test"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "ABSENT"
+    expected_limitation: false
+    rationale: "Track order endpoint returns JSON or 404; raw input canary is not reflected into HTML executable context."
+
+  - id: "dvwa-static-instructions-negative"
+    suite: "live"
+    target: "http://localhost:8080"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/instructions.php?doc=readme"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "dvwa"
+      security_level: "low"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "ABSENT"
+    expected_limitation: false
+    rationale: "Static instructions documentation page ignores arbitrary query parameters and does not reflect canary."
+
+  - id: "juiceshop-dynamic-echo-negative"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/rest/languages?lang=en"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "ABSENT"
+    expected_limitation: false
+    rationale: "Language catalog returns static language objects; query argument is ignored and not reflected."
+
+  - id: "unit-reflected-html-attribute-context"
+    suite: "unit"
+    target: "mock://synthetic-xss"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/search?q=test"
+      method: "GET"
+      synthetic_fixture_key: "reflected_attr_sample"
+    setup:
+      needs_auth: false
+      needs_lab: "none"
+    expected_outcome: "HYPOTHESIS"
+    expected_evidence_substring: "POTENTIAL_EXECUTABLE_CONTEXT"
+    expected_limitation: false
+    rationale: "Synthetic response echoes canary into input attribute with unencoded quotes, which breaks out of value attribute."
+
+  - id: "unit-reflected-script-context"
+    suite: "unit"
+    target: "mock://synthetic-xss"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/search?q=test"
+      method: "GET"
+      synthetic_fixture_key: "reflected_script_sample"
+    setup:
+      needs_auth: false
+      needs_lab: "none"
+    expected_outcome: "HYPOTHESIS"
+    expected_evidence_substring: "POTENTIAL_EXECUTABLE_CONTEXT"
+    expected_limitation: false
+    rationale: "Synthetic response echoes canary inside script block with unencoded single quotes, allowing script breakout."
+
+  - id: "unit-reflected-fully-escaped-negative"
+    suite: "unit"
+    target: "mock://synthetic-xss"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/search?q=test"
+      method: "GET"
+      synthetic_fixture_key: "reflected_escaped_sample"
+    setup:
+      needs_auth: false
+      needs_lab: "none"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "ENCODED_SAFE"
+    expected_limitation: false
+    rationale: "Synthetic response strictly HTML entity-encodes all control characters (&lt; &gt; &quot; &#39;), neutralizing executable context."
+
+  - id: "limit-dom-based-reflection"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/#/search?q=<test>"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "ABSENT"
+    expected_limitation: true
+    rationale: "Known architectural limitation: DOM-based XSS executed only by browser JS via location.hash. Server-side HTTP probe receives static index.html and cannot detect DOM sinks without headless browser runtime."
+
+  - id: "limit-post-json-reflection"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "reflected_input_check"
+    request:
+      endpoint: "/api/Feedbacks/"
+      method: "POST"
+      json_body:
+        comment: "<canary>"
+        rating: 5
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "ABSENT"
+    expected_limitation: true
+    rationale: "Known architectural limitation: Detector only injects and tests GET query parameters; body reflections in POST JSON APIs are outside current detector scope."
+
+  # ============================================================================
+  # Access Control Check (12 Cases: 6 Live, 3 Unit, 3 Limitations)
+  # ============================================================================
+  - id: "crapi-bola-vehicle-location-positive"
+    suite: "live"
+    target: "http://localhost:8888"
+    detector: "access_control_check"
+    request:
+      endpoint: "/identity/api/v2/vehicle/{vehicle_id}/location"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "crapi"
+      resource_owner: "user_b"
+      cross_session_accessor: "user_a"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "access_control:two_session_leak_confirmed"
+    expected_limitation: false
+    rationale: "OWASP crAPI vehicle location API allows User A to view User B vehicle coordinates across sessions without authorization (BOLA)."
+
+  - id: "crapi-bola-vehicle-unauth-negative"
+    suite: "live"
+    target: "http://localhost:8888"
+    detector: "access_control_check"
+    request:
+      endpoint: "/identity/api/v2/vehicle/{vehicle_id}/location"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "crapi"
+      resource_owner: "user_b"
+      cross_session_accessor: "unauthorized"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "access_control:two_session_enforced"
+    expected_limitation: false
+    rationale: "Accessing vehicle location without authorization token or with invalid session returns HTTP 401 Unauthorized."
+
+  - id: "juiceshop-idor-search-negative"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "access_control_check"
+    request:
+      endpoint: "/rest/products/search?q=apple"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "INCONCLUSIVE"
+    expected_evidence_substring: "two_session_inconclusive"
+    expected_limitation: false
+    rationale: "Product search catalog returns public items identically across unauthenticated and authenticated sessions without tenant data."
+
+  - id: "juiceshop-idor-basket-enforced"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "access_control_check"
+    request:
+      endpoint: "/rest/basket/999"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "access_control:two_session_enforced"
+    expected_limitation: false
+    rationale: "Juice Shop returns 401 Unauthorized when attempting to query an unauthorized user basket without a valid session token."
+
+  - id: "dvwa-idor-public-profile-negative"
+    suite: "live"
+    target: "http://localhost:8080"
+    detector: "access_control_check"
+    request:
+      endpoint: "/vulnerabilities/sqli/?id=1&Submit=Submit"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "dvwa"
+      security_level: "low"
+    expected_outcome: "INCONCLUSIVE"
+    expected_evidence_substring: "two_session_inconclusive"
+    expected_limitation: false
+    rationale: "DVWA SQLi lab endpoint with numeric query id is a shared database query; does not represent isolated multi-tenant private user sessions."
+
+  - id: "juiceshop-public-reviews-negative"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "access_control_check"
+    request:
+      endpoint: "/rest/products/1/reviews"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "INCONCLUSIVE"
+    expected_evidence_substring: "two_session_inconclusive"
+    expected_limitation: false
+    rationale: "Product reviews are public comments accessible equally to all sessions; identical public data without private tenant fields."
+
+  - id: "unit-idor-numeric-tenant-leak-positive"
+    suite: "unit"
+    target: "mock://synthetic-idor"
+    detector: "access_control_check"
+    request:
+      endpoint: "/api/user/profile?id=101"
+      method: "GET"
+      synthetic_fixture_key: "idor_leak_sample"
+    setup:
+      needs_auth: true
+      needs_lab: "none"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "access_control:two_session_leak_confirmed"
+    expected_limitation: false
+    rationale: "Synthetic fixture returns distinct private user profile (ssn, balance, name) when numeric id is incremented under unauthorized tenant session."
+
+  - id: "unit-idor-enforced-403-negative"
+    suite: "unit"
+    target: "mock://synthetic-idor"
+    detector: "access_control_check"
+    request:
+      endpoint: "/api/user/profile?id=101"
+      method: "GET"
+      synthetic_fixture_key: "idor_403_sample"
+    setup:
+      needs_auth: true
+      needs_lab: "none"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "access_control:two_session_enforced"
+    expected_limitation: false
+    rationale: "Synthetic fixture returns HTTP 403 Forbidden when swapped identifier is queried, confirming enforced authorization boundaries."
+
+  - id: "unit-idor-identical-public-resource"
+    suite: "unit"
+    target: "mock://synthetic-idor"
+    detector: "access_control_check"
+    request:
+      endpoint: "/api/catalog/items?id=101"
+      method: "GET"
+      synthetic_fixture_key: "idor_public_sample"
+    setup:
+      needs_auth: true
+      needs_lab: "none"
+    expected_outcome: "INCONCLUSIVE"
+    expected_evidence_substring: "two_session_inconclusive"
+    expected_limitation: false
+    rationale: "Synthetic fixture returns identical non-identifying public metadata across both sessions; classified inconclusive."
+
+  - id: "limit-crapi-uuid-path-idor"
+    suite: "live"
+    target: "http://localhost:8888"
+    detector: "access_control_check"
+    request:
+      endpoint: "/community/api/v2/community/posts/11111111-2222-3333-4444-555555555555"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "crapi"
+    expected_outcome: "INCONCLUSIVE"
+    expected_evidence_substring: "two_session_inconclusive"
+    expected_limitation: true
+    rationale: "Known architectural limitation: Target identifier is a 128-bit random UUID path segment. Detector only tests numeric incrementation and cannot guess unlinked random UUIDs."
+
+  - id: "limit-post-json-idor"
+    suite: "live"
+    target: "http://localhost:8888"
+    detector: "access_control_check"
+    request:
+      endpoint: "/workshop/api/merchant/contact_mechanic"
+      method: "POST"
+      json_body:
+        mechanic_code: "MECH_1234"
+        problem_details: "Engine check"
+    setup:
+      needs_auth: true
+      needs_lab: "crapi"
+    expected_outcome: "INCONCLUSIVE"
+    expected_evidence_substring: "two_session_inconclusive"
+    expected_limitation: true
+    rationale: "Known architectural limitation: Multi-tenant action requires POST JSON body manipulation. Detector is GET-only per Section 6.5 design."
+
+  - id: "limit-header-tenant-routing"
+    suite: "unit"
+    target: "mock://synthetic-tenant-header"
+    detector: "access_control_check"
+    request:
+      endpoint: "/api/v1/tenant/dashboard"
+      method: "GET"
+      headers:
+        X-Tenant-ID: "tenant-beta"
+    setup:
+      needs_auth: true
+      needs_lab: "none"
+    expected_outcome: "INCONCLUSIVE"
+    expected_evidence_substring: "two_session_inconclusive"
+    expected_limitation: true
+    rationale: "Known architectural limitation: Tenancy is isolated via HTTP headers rather than URL path/query parameters. Detector only tests path and query parameters."
+
+  # ============================================================================
+  # Secret Detection (12 Cases: 7 Live, 3 Unit, 2 Limitations)
+  # ============================================================================
+  - id: "juiceshop-login-jwt-live-positive"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "secret_detection"
+    request:
+      endpoint: "/rest/user/login"
+      method: "POST"
+      json_body:
+        email: "' or 1=1--"
+        password: "x"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "jwt_token:CONFIRMED"
+    expected_limitation: false
+    rationale: "Live Juice Shop login returns authentic JWT with RS256 header and valid base64url JSON payload. Promoted to CONFIRMED via structural validation."
+
+  - id: "crapi-login-jwt-live-positive"
+    suite: "live"
+    target: "http://localhost:8888"
+    detector: "secret_detection"
+    request:
+      endpoint: "/identity/api/auth/login"
+      method: "POST"
+    setup:
+      needs_auth: true
+      needs_lab: "crapi"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "jwt_token:CONFIRMED"
+    expected_limitation: false
+    rationale: "Live crAPI login response contains authentic JWT whose header and payload decode to valid JSON objects. Promoted to CONFIRMED via structural validation."
+
+  - id: "juiceshop-ftp-directory-negative"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "secret_detection"
+    request:
+      endpoint: "/ftp"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "no_secrets_found"
+    expected_limitation: false
+    rationale: "Juice Shop public /ftp directory listing HTML contains file metadata and anchor links, but no exposed secrets or keys."
+
+  - id: "juiceshop-robots-txt-negative"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "secret_detection"
+    request:
+      endpoint: "/robots.txt"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "no_secrets_found"
+    expected_limitation: false
+    rationale: "Standard crawler exclusion directives; contains Disallow rules without credentials or tokens."
+
+  - id: "dvwa-login-form-negative"
+    suite: "live"
+    target: "http://localhost:8080"
+    detector: "secret_detection"
+    request:
+      endpoint: "/login.php"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "dvwa"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "no_secrets_found"
+    expected_limitation: false
+    rationale: "Standard HTML login form with input type='password' fields does not contain hardcoded secret values."
+
+  - id: "dvwa-home-html-negative"
+    suite: "live"
+    target: "http://localhost:8080"
+    detector: "secret_detection"
+    request:
+      endpoint: "/index.php"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "dvwa"
+      security_level: "low"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "no_secrets_found"
+    expected_limitation: false
+    rationale: "Authenticated DVWA home portal contains instructional navigation HTML and instructions without secrets."
+
+  - id: "crapi-vehicle-unauth-negative"
+    suite: "live"
+    target: "http://localhost:8888"
+    detector: "secret_detection"
+    request:
+      endpoint: "/identity/api/v2/vehicle/vehicles"
+      method: "GET"
+    setup:
+      needs_auth: false
+      needs_lab: "crapi"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "no_secrets_found"
+    expected_limitation: false
+    rationale: "Unauthenticated request returns 401 error message without credential leakage."
+
+  - id: "unit-secret-aws-key-positive"
+    suite: "unit"
+    target: "mock://synthetic-config"
+    detector: "secret_detection"
+    request:
+      endpoint: "/config/env.js"
+      method: "GET"
+      synthetic_fixture_key: "aws_key_sample"
+    setup:
+      needs_auth: false
+      needs_lab: "none"
+    expected_outcome: "HYPOTHESIS"
+    expected_evidence_substring: "aws_access_key:HYPOTHESIS"
+    expected_limitation: false
+    rationale: "Response body matches structural AWS Access Key ID format (AKIA+16). Per rule, unvalidated regex pattern produces HYPOTHESIS until verified via active AWS STS call."
+
+  - id: "unit-secret-db-url-positive"
+    suite: "unit"
+    target: "mock://synthetic-db"
+    detector: "secret_detection"
+    request:
+      endpoint: "/env/database"
+      method: "GET"
+      synthetic_fixture_key: "database_url_sample"
+    setup:
+      needs_auth: false
+      needs_lab: "none"
+    expected_outcome: "HYPOTHESIS"
+    expected_evidence_substring: "database_url:HYPOTHESIS"
+    expected_limitation: false
+    rationale: "Response body matches database connection string URI pattern. Per rule, regex matches produce HYPOTHESIS until confirmed by live network probe."
+
+  - id: "unit-secret-valid-jwt-positive"
+    suite: "unit"
+    target: "mock://synthetic-jwt"
+    detector: "secret_detection"
+    request:
+      endpoint: "/api/v1/auth/callback"
+      method: "GET"
+      synthetic_fixture_key: "jwt_token_sample"
+    setup:
+      needs_auth: false
+      needs_lab: "none"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "jwt_token:CONFIRMED"
+    expected_limitation: false
+    rationale: "Synthetic response contains valid JWT. Base64url header and payload decode to JSON objects with 'alg' and 'sub', satisfying structural validation rule for CONFIRMED."
+
+  - id: "limit-entropy-high-token"
+    suite: "unit"
+    target: "mock://synthetic-entropy"
+    detector: "secret_detection"
+    request:
+      endpoint: "/api/session/debug"
+      method: "GET"
+      synthetic_fixture_key: "entropy_token_sample"
+    setup:
+      needs_auth: false
+      needs_lab: "none"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "no_secrets_found"
+    expected_limitation: true
+    rationale: "Known architectural limitation: High-entropy opaque random string without standard keyword prefix (AKIA, Bearer, etc.). Regex-based detector misses high-entropy random secrets without Shannon entropy analysis."
+
+  - id: "limit-obfuscated-base64-secret"
+    suite: "unit"
+    target: "mock://synthetic-obfuscated"
+    detector: "secret_detection"
+    request:
+      endpoint: "/assets/app.bundle.js"
+      method: "GET"
+      synthetic_fixture_key: "obfuscated_b64_sample"
+    setup:
+      needs_auth: false
+      needs_lab: "none"
+    expected_outcome: "NOT_VULNERABLE"
+    expected_evidence_substring: "no_secrets_found"
+    expected_limitation: true
+    rationale: "Known architectural limitation: Secret is encoded in base64 within JavaScript atob(...) wrapper. Detector scans raw HTTP text and does not execute client JavaScript or deobfuscate strings."

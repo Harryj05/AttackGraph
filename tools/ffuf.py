@@ -88,6 +88,11 @@ def execute_ffuf_scan(scan_id: str, db: Session, wordlist_path: Optional[str] = 
 
     # Format strict host:port target URL for ffuf scoping
     target_base = f"{scheme}://{host}:{port}"
+
+    from api.allowlist import allowlist_validator
+    if not allowlist_validator.is_target_allowed(target_base):
+        raise ValueError(f"Security Violation: Target '{target_base}' is not in the allowlist.")
+
     fuzz_url = f"{target_base}/FUZZ"
 
     ffuf_binary = get_ffuf_binary()
@@ -247,6 +252,7 @@ def execute_ffuf_scan(scan_id: str, db: Session, wordlist_path: Optional[str] = 
                     source_node_id=target_service_node.id,
                     target_node_id=node.id,
                     relation_type="has_endpoint",
+                    layer="asset",
                     pattern_key="ffuf:endpoint_discovered",
                     confidence=conf_value,
                     evidence_only_confidence=conf_value,

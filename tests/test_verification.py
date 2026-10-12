@@ -369,3 +369,69 @@ def test_cross_scan_scoping_reverify_and_human_review():
     )
     assert res_review.status_code == 403
     assert "Security Violation" in res_review.json()["detail"]
+
+
+@patch("graph.verification.execute_access_control_check")
+def test_reverify_edge_five_times_idempotent(mock_check):
+    """
+    Regression test for Item 2: Five repeated re-verifications of the exact same edge
+    must change pattern_stats counters at most once. Flipping from VERIFIED to REFUTED
+    must decrement times_verified and increment times_refuted.
+    """
+    mock_check.return_value = {
+        "scan_id": "test-scan",
+        "finding": {"is_potential_issue": True, "confidence": 0.6}
+    }
+
+    db = TestingSessionLocal()
+    scan = Scan(target_url="http://localhost:3000", status="COMPLETED")
+    db.add(scan)
+    db.commit()
+
+    n1 = Node(scan_id=scan.id, label="Endpoint 1", node_type="endpoint")
+    n2 = Node(scan_id=scan.id, label="Finding 1", node_type="finding")
+    db.add_all([n1, n2])
+    db.commit()
+
+    edge = Edge(
+        scan_id=scan.id,
+        source_node_id=n1.id,
+        target_node_id=n2.id,
+        relation_type="possible_issue",
+        confidence=0.6,
+        pattern_key="access_control_check:idempotency_test",
+        status="unverified"
+    )
+    db.add(edge)
+    db.commit()
+
+    from db.models import PatternStats
+
+    # 1. First reverification -> outcome VERIFIED
+    res1 = reverify_edge(edge.id, db)
+    assert res1["verification_outcome"] == "VERIFIED"
+
+    stats = db.query(PatternStats).filter(PatternStats.pattern_key == "access_control_check:idempotency_test").first()
+    assert stats.times_verified == 1
+    assert stats.times_refuted == 0
+
+    # 2-5. Four more reverifications with same outcome (total 5 times)
+    for _ in range(4):
+        res = reverify_edge(edge.id, db)
+        assert res["verification_outcome"] == "VERIFIED"
+
+    db.refresh(stats)
+    assert stats.times_verified == 1  # MUST NOT BE 5!
+    assert stats.times_refuted == 0
+
+    # 6. Now simulate refutation on re-check
+    mock_check.return_value = {
+        "scan_id": "test-scan",
+        "finding": {"is_potential_issue": False, "confidence": 0.0}
+    }
+    res_refute = reverify_edge(edge.id, db)
+    assert res_refute["verification_outcome"] == "REFUTED"
+
+    db.refresh(stats)
+    assert stats.times_verified == 0
+    assert stats.times_refuted == 1

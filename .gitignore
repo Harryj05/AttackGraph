@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 .env
 .env*
+!.env.example
 .venv/
 
 env/
@@ -11,3 +12,9 @@ venv/
 *.log
 scratch/
 
+reports/*.pdf
+reports/*.sarif
+
+eval/fixtures.local.json
+eval/results/*.json
+eval/results/

@@ -152,6 +152,12 @@ def calculate_path_confidence(node_ids: List[str], db: Session) -> Dict[str, Any
         if not edge:
             raise ValueError(f"No connecting edge found between node '{source_id}' and node '{target_id}'.")
 
+        if getattr(edge, "layer", "attack") != "attack":
+            raise ValueError(
+                f"Model / Layer Violation: Edge between '{source_id}' and '{target_id}' is on asset layer ('{edge.layer}'). "
+                "Weakest-link confidence index is strictly restricted to attack-layer edges."
+            )
+
         edges.append(edge)
         conf = edge.confidence if edge.confidence is not None else 0.0
         edge_confidences.append(conf)
@@ -175,15 +181,17 @@ def calculate_path_confidence(node_ids: List[str], db: Session) -> Dict[str, Any
         "node_ids": node_ids,
         "edge_confidences": edge_confidences,
         "path_confidence": min_conf,
+        "weakest_link_confidence_index": min_conf,
         "weakest_edge": weakest_edge_dict
     }
 
 
 def find_all_paths_to_node(target_node_id: str, scan_id: str, db: Session) -> List[List[str]]:
     """
-    Traverses the graph backwards through edges to find all simple paths
-    from any root node (a node in scan_id with no incoming edges) to target_node_id.
+    Traverses the graph backwards through attack-layer edges to find all simple paths
+    from any root node (a node in scan_id with no incoming attack-layer edges) to target_node_id.
     Returns a list of node ID lists, where each list is an ordered path [root_node, ..., target_node].
+    Asset-layer edges (has_endpoint, runs_service) are excluded.
     """
     scan = db.query(Scan).filter(Scan.id == scan_id).first()
     if not scan:
@@ -199,6 +207,9 @@ def find_all_paths_to_node(target_node_id: str, scan_id: str, db: Session) -> Li
     all_nodes = db.query(Node).filter(Node.scan_id == scan_id).all()
     all_edges = db.query(Edge).filter(Edge.scan_id == scan_id).all()
 
+    # Restrict path exploration strictly to attack-layer edges
+    attack_edges = [e for e in all_edges if getattr(e, "layer", "attack") == "attack"]
+
     node_ids = {n.id for n in all_nodes}
     if target_node_id not in node_ids:
         return []
@@ -206,7 +217,7 @@ def find_all_paths_to_node(target_node_id: str, scan_id: str, db: Session) -> Li
     graph: Dict[str, List[str]] = {nid: [] for nid in node_ids}
     in_degree: Dict[str, int] = {nid: 0 for nid in node_ids}
 
-    for edge in all_edges:
+    for edge in attack_edges:
         if edge.source_node_id in graph and edge.target_node_id in node_ids:
             graph[edge.source_node_id].append(edge.target_node_id)
             in_degree[edge.target_node_id] += 1
