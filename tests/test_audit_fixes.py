@@ -60,13 +60,13 @@ def test_unauthenticated_request_returns_401():
 def test_authenticated_request_with_header_and_query():
     valid_key = "attackgraph-insecure-dev-key"
 
-    # Header authentication
+    # Header authentication succeeds
     res_header = client.get("/scans", headers={"X-API-Key": valid_key})
     assert res_header.status_code == 200
 
-    # Query param authentication (for browser attachment downloads)
+    # Query param authentication is rejected with 401 to prevent URL log leakage
     res_query = client.get(f"/scans?api_key={valid_key}", headers={"skip-auto-auth": "true"})
-    assert res_query.status_code == 200
+    assert res_query.status_code == 401
 
 
 def test_disallowed_origin_is_rejected():

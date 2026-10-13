@@ -1,0 +1,39 @@
+# .gitleaksignore
+# AttackGraph AI - Documented Allowlist / False Positive Justifications
+# Each fingerprint corresponds to historical documentation, local lab config, or synthetic test fixtures.
+# Zero production secrets exist in repository history.
+
+# Justification: Historical documentation example curl commands showing dev API key in commit 288e0ec.
+# Fixed in active codebase to fail closed on startup; read-only documentation references in git history.
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:README.md:curl-auth-header:309
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:README.md:curl-auth-header:319
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:README.md:curl-auth-header:331
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:README.md:curl-auth-header:340
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:README.md:curl-auth-header:344
+
+# Justification: Synthetic mock session token string in eval/run.py for Juice Shop lab seeding.
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:eval/run.py:generic-api-key:145
+
+# Justification: Synthetic unit test fixture strings in tests/test_secret_detection.py
+# verifying regex detection for API keys, AWS keys, and RFC 7519 test JWTs.
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:tests/test_secret_detection.py:generic-api-key:56
+01809002c058b3168e595047b57799df595f22f8:tests/test_secret_detection.py:generic-api-key:27
+01809002c058b3168e595047b57799df595f22f8:tests/test_secret_detection.py:generic-api-key:50
+01809002c058b3168e595047b57799df595f22f8:tests/test_secret_detection.py:jwt:26
+
+# Justification: Documentation example Markdown illustrating verified crAPI BOLA vulnerability finding.
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:README.md:crapi-vehicle-uuid:381
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:README.md:crapi-vehicle-uuid:383
+
+# Justification: Local Docker development environment configuration for crAPI lab services (RFC 2606 example.com).
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:docker-compose.crapi.yml:lab-emails:25
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:docker-compose.crapi.yml:lab-emails:27
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:docker-compose.crapi.yml:lab-emails:156
+
+# Justification: Local test setup script default seed email handles for crAPI lab evaluation.
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:scripts/setup_crapi_users.py:lab-emails:24
+288e0ecb1ac89c8bea8c3549a7bb6f3eb41b9980:scripts/setup_crapi_users.py:lab-emails:29
+
+# Justification: Unit test fixture synthetic JSON responses for differential access control checks.
+136d3e716aaa377197c64c7e0fad50c53245050d:tests/test_access_control_check.py:lab-emails:47
+136d3e716aaa377197c64c7e0fad50c53245050d:tests/test_access_control_check.py:lab-emails:48

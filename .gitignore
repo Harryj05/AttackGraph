@@ -11,10 +11,21 @@ env/
 venv/
 *.log
 scratch/
+scratch_*.py
 
 reports/*.pdf
 reports/*.sarif
 
+# Token and credential files
+*token*.json
+*.token
+*tokens*.json
+token.txt
+tokens/
+
 eval/fixtures.local.json
 eval/results/*.json
-eval/results/
+!eval/results/latest.json
+!eval/results/mode_comparison_crapi.json
+!eval/results/mode_comparison_juiceshop.json
+!eval/results/mode_comparison.json

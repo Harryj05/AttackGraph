@@ -7,6 +7,39 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
+  security-audit:
+    name: Security & Secret Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Static Security Analysis (Bandit)
+        run: |
+          bandit -r api agent tools reports -ll
+
+      - name: Dependency Vulnerability Audit (pip-audit)
+        run: |
+          pip-audit -r requirements.txt
+
+      - name: Secret Scan (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
   lint:
     name: Lint & Code Style
     runs-on: ubuntu-latest
@@ -34,9 +67,44 @@ jobs:
           # Exit-zero reports formatting and style complexity warnings
           flake8 . --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
 
-  test:
-    name: Unit & Mocked Test Suite
+  frontend-build:
+    name: Frontend Build & Type Check
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type check & build bundle
+        working-directory: frontend
+        run: npm run build
+
+  test:
+    name: Test Suite (PostgreSQL Service Container)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: attackgraph_user
+          POSTGRES_PASSWORD: attackgraph_password
+          POSTGRES_DB: attackgraph_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -51,12 +119,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run unit & mocked test suite
+      - name: Run database migrations (Alembic)
         env:
-          DATABASE_URL: "sqlite:///:memory:"
+          DATABASE_URL: "postgresql://attackgraph_user:attackgraph_password@localhost:5432/attackgraph_db"
+        run: |
+          alembic upgrade head
+
+      - name: Run test suite
+        env:
+          DATABASE_URL: "postgresql://attackgraph_user:attackgraph_password@localhost:5432/attackgraph_db"
           ATTACKGRAPH_API_KEY: "attackgraph-insecure-dev-key"
           X_API_KEY: "attackgraph-insecure-dev-key"
           CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
         run: |
-          # Runs all 146 unit & mocked tests; live-lab container tests auto-skip when targets are offline
+          # Runs full pytest suite against real PostgreSQL service container
           python -m pytest -v

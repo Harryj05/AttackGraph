@@ -148,10 +148,32 @@ export async function createScan(targetUrl: string): Promise<Scan> {
   return res.json();
 }
 
+export async function downloadExportReport(scanId: string, format: 'sarif' | 'pdf'): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/scans/${scanId}/export/${format}`, {
+    method: 'GET',
+    headers: getHeaders(),
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(`Failed to download ${format.toUpperCase()} report: ${res.statusText} ${errText}`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `attackgraph_scan_${scanId.slice(0, 8)}.${format === 'sarif' ? 'sarif' : 'pdf'}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+
+// Deprecated: Kept for backwards compatibility if needed, but downloads should use downloadExportReport
 export function getExportSarifUrl(scanId: string): string {
-  return `${API_BASE_URL}/scans/${scanId}/export/sarif?api_key=${encodeURIComponent(API_KEY)}`;
+  return `${API_BASE_URL}/scans/${scanId}/export/sarif`;
 }
 
 export function getExportPdfUrl(scanId: string): string {
-  return `${API_BASE_URL}/scans/${scanId}/export/pdf?api_key=${encodeURIComponent(API_KEY)}`;
+  return `${API_BASE_URL}/scans/${scanId}/export/pdf`;
 }
+

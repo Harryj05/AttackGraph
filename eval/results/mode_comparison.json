@@ -1,0 +1,308 @@
+{
+  "timestamp": "2026-10-13T10:58:19.274243Z",
+  "target_lab": "crapi",
+  "target_url": "http://localhost:8888",
+  "budgets_tested": [
+    5
+  ],
+  "runs_per_budget": 5,
+  "agent_mode": "live_gemini",
+  "model_name": "gemini-3.5-flash-lite",
+  "results_by_budget": {
+    "5": {
+      "budget": 5,
+      "runs": 5,
+      "deterministic": {
+        "steps": {
+          "mean": 5.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 6.0,
+          "stdev": 0.0
+        },
+        "valid_findings": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 8.194,
+          "stdev": 0.3817
+        },
+        "tokens": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "excluded_runs": 0
+      },
+      "agent": {
+        "steps": {
+          "mean": 5.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 6.2,
+          "stdev": 0.4472
+        },
+        "valid_findings": {
+          "mean": 0.2,
+          "stdev": 0.4472
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 5.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 18.33,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 20.69,
+          "stdev": 1.9774
+        },
+        "tokens": {
+          "mean": 12663.4,
+          "stdev": 48.9826
+        },
+        "cost": {
+          "mean": 0.001,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "excluded_runs": 0
+      }
+    }
+  },
+  "raw_runs": [
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 1,
+      "scan_id": "16d8fa49-eec8-409c-9636-edd505ca5411",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 8.87,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 1,
+      "scan_id": "cc733099-2282-45e8-ad1f-e6cb5033141d",
+      "is_valid": true,
+      "status": "VALID",
+      "invalid_reason": null,
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 19.82,
+      "tokens": 12656,
+      "cost": 0.001018,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 2,
+      "scan_id": "4dbd5123-ce25-4017-bc5a-77562c9aff05",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 8.04,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 2,
+      "scan_id": "e15dea26-4e1e-4dc8-b528-86c3ffdb0ad5",
+      "is_valid": true,
+      "status": "VALID",
+      "invalid_reason": null,
+      "steps": 5,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 5,
+      "seconds_to_first_valid": 18.33,
+      "wall_time": 18.34,
+      "tokens": 12597,
+      "cost": 0.001011,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 3,
+      "scan_id": "8682a31a-aa3d-41be-adca-b1faf0c4c520",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 8.09,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 3,
+      "scan_id": "3d8bbfd0-15e8-4013-abf7-05b67242afa6",
+      "is_valid": true,
+      "status": "VALID",
+      "invalid_reason": null,
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 20.15,
+      "tokens": 12641,
+      "cost": 0.001021,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 4,
+      "scan_id": "f5b00c1b-c5f4-4185-9b2a-078b68234232",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 8.03,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 4,
+      "scan_id": "60769f4d-4622-48b1-b274-bb11e78b3b97",
+      "is_valid": true,
+      "status": "VALID",
+      "invalid_reason": null,
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 21.57,
+      "tokens": 12713,
+      "cost": 0.001043,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 5,
+      "scan_id": "483baa3f-9c19-41e4-be39-5f9a92dfe77f",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 7.94,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 5,
+      "scan_id": "f4d8c1a5-d65f-41c4-80d0-b76fd319bf8f",
+      "is_valid": true,
+      "status": "VALID",
+      "invalid_reason": null,
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 23.57,
+      "tokens": 12710,
+      "cost": 0.001042,
+      "refusals": 0,
+      "duplicate_actions": 0
+    }
+  ]
+}

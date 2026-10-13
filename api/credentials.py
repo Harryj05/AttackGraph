@@ -80,4 +80,20 @@ def auto_load_lab_credentials(scan_id: str, target_url: str) -> List[str]:
             register_scan_credentials(scan_id, creds)
             handles_registered = list(creds.keys())
 
+    # 2. Juice Shop targets (port 3000)
+    elif ":3000" in target_url:
+        try:
+            from eval.run import setup_juiceshop_credentials
+            js_creds = setup_juiceshop_credentials()
+            creds = {}
+            if js_creds.get("user_a_token"):
+                creds["user_a"] = js_creds["user_a_token"]
+            if js_creds.get("user_b_token"):
+                creds["user_b"] = js_creds["user_b_token"]
+            if creds:
+                register_scan_credentials(scan_id, creds)
+                handles_registered = list(creds.keys())
+        except Exception:
+            pass
+
     return handles_registered

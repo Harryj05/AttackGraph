@@ -1,13 +1,19 @@
 # eval/cases.yaml
-# AttackGraph AI - Evaluation Test Suite v2 (36 Cases)
+# AttackGraph AI - Evaluation Test Suite v3 (41 Cases)
 # Ground truth rationales documented BEFORE suite execution.
 #
-# Structural Validation Rule for Secrets:
-# Regex pattern matches produce state HYPOTHESIS by default.
-# Only secrets whose internal structure can be decoded and verified offline
-# (e.g., JWT header/payload base64url decode into valid JSON objects with 'alg' or 'typ')
-# are promoted to CONFIRMED. Unvalidated regex matches (e.g. AWS access key ID format,
-# database URLs, API key assignments) remain HYPOTHESIS until actively verified.
+# Schema:
+# - ground_truth: "VULNERABLE" | "NOT_VULNERABLE" (Independent real-world security ground truth)
+# - expected_outcome: Tool detector expected verification state (CONFIRMED, HYPOTHESIS, INCONCLUSIVE, NOT_VULNERABLE)
+# - expected_limitation: true if the case tests an acknowledged architectural limitation / blind spot
+#
+# Rules:
+# 1. For all expected_limitation cases, ground_truth is VULNERABLE. Tool non-detection counts as a False Negative in overall recall.
+# 2. Structural Validation Rule for Secrets:
+#    Regex pattern matches produce state HYPOTHESIS by default.
+#    Only secrets whose internal structure can be decoded and verified offline
+#    (e.g., JWT header/payload base64url decode into valid JSON objects with 'alg' or 'typ')
+#    are promoted to CONFIRMED. Unvalidated regex matches remain HYPOTHESIS until actively verified.
 
 cases:
   # ============================================================================
@@ -24,6 +30,7 @@ cases:
       needs_auth: true
       needs_lab: "dvwa"
       security_level: "low"
+    ground_truth: "VULNERABLE"
     expected_outcome: "HYPOTHESIS"
     expected_evidence_substring: "POTENTIAL_EXECUTABLE_CONTEXT"
     expected_limitation: false
@@ -40,6 +47,7 @@ cases:
       needs_auth: true
       needs_lab: "dvwa"
       security_level: "medium"
+    ground_truth: "VULNERABLE"
     expected_outcome: "HYPOTHESIS"
     expected_evidence_substring: "POTENTIAL_EXECUTABLE_CONTEXT"
     expected_limitation: false
@@ -56,6 +64,7 @@ cases:
       needs_auth: true
       needs_lab: "dvwa"
       security_level: "impossible"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "ENCODED_SAFE"
     expected_limitation: false
@@ -71,6 +80,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "ABSENT"
     expected_limitation: false
@@ -86,6 +96,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "ABSENT"
     expected_limitation: false
@@ -102,6 +113,7 @@ cases:
       needs_auth: true
       needs_lab: "dvwa"
       security_level: "low"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "ABSENT"
     expected_limitation: false
@@ -117,6 +129,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "ABSENT"
     expected_limitation: false
@@ -133,6 +146,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "none"
+    ground_truth: "VULNERABLE"
     expected_outcome: "HYPOTHESIS"
     expected_evidence_substring: "POTENTIAL_EXECUTABLE_CONTEXT"
     expected_limitation: false
@@ -149,6 +163,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "none"
+    ground_truth: "VULNERABLE"
     expected_outcome: "HYPOTHESIS"
     expected_evidence_substring: "POTENTIAL_EXECUTABLE_CONTEXT"
     expected_limitation: false
@@ -165,6 +180,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "none"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "ENCODED_SAFE"
     expected_limitation: false
@@ -180,10 +196,11 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "ABSENT"
     expected_limitation: true
-    rationale: "Known architectural limitation: DOM-based XSS executed only by browser JS via location.hash. Server-side HTTP probe receives static index.html and cannot detect DOM sinks without headless browser runtime."
+    rationale: "Known architectural limitation: DOM-based XSS executed only by browser JS via location.hash. Server-side HTTP probe receives static index.html and cannot detect DOM sinks without headless browser runtime. Ground truth is VULNERABLE; tool non-detection counts as False Negative in overall recall."
 
   - id: "limit-post-json-reflection"
     suite: "live"
@@ -198,13 +215,14 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "ABSENT"
     expected_limitation: true
-    rationale: "Known architectural limitation: Detector only injects and tests GET query parameters; body reflections in POST JSON APIs are outside current detector scope."
+    rationale: "Known architectural limitation: Detector only injects and tests GET query parameters; body reflections in POST JSON APIs are outside current detector scope. Ground truth is VULNERABLE; tool non-detection counts as False Negative in overall recall."
 
   # ============================================================================
-  # Access Control Check (12 Cases: 6 Live, 3 Unit, 3 Limitations)
+  # Access Control Check (15 Cases: 9 Live, 3 Unit, 3 Limitations)
   # ============================================================================
   - id: "crapi-bola-vehicle-location-positive"
     suite: "live"
@@ -218,10 +236,65 @@ cases:
       needs_lab: "crapi"
       resource_owner: "user_b"
       cross_session_accessor: "user_a"
+    ground_truth: "VULNERABLE"
     expected_outcome: "CONFIRMED"
     expected_evidence_substring: "access_control:two_session_leak_confirmed"
     expected_limitation: false
-    rationale: "OWASP crAPI vehicle location API allows User A to view User B vehicle coordinates across sessions without authorization (BOLA)."
+    rationale: "OWASP crAPI vehicle location API allows User A to view User B vehicle coordinates across sessions without authorization (BOLA / CWE-639)."
+
+  - id: "juiceshop-bola-basket-two-user-positive"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "access_control_check"
+    request:
+      endpoint: "/rest/basket/{basket_id}"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "juiceshop"
+      resource_owner: "user_b"
+      cross_session_accessor: "user_a"
+    ground_truth: "VULNERABLE"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "access_control:two_session_leak_confirmed"
+    expected_limitation: false
+    rationale: "OWASP Juice Shop basket endpoint /rest/basket/{bid} enforces authentication (unauthenticated requests return 401), but fails authorization: User A (eval_user_1) can fetch User B's (eval_user_2) basket items across tenant boundaries (BOLA / CWE-639)."
+
+  - id: "crapi-bola-mechanic-report-positive"
+    suite: "live"
+    target: "http://localhost:8888"
+    detector: "access_control_check"
+    request:
+      endpoint: "/workshop/api/mechanic/mechanic_report?report_id=1"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "crapi"
+      resource_owner: "user_b"
+      cross_session_accessor: "user_a"
+    ground_truth: "VULNERABLE"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "access_control:two_session_leak_confirmed"
+    expected_limitation: false
+    rationale: "crAPI mechanic report endpoint /workshop/api/mechanic/mechanic_report?report_id=1 requires session authentication (401 unauth), but allows User A to read User B's vehicle VIN, owner email, and mechanic code (BOLA / CWE-639)."
+
+  - id: "crapi-bola-mechanic-report-2-positive"
+    suite: "live"
+    target: "http://localhost:8888"
+    detector: "access_control_check"
+    request:
+      endpoint: "/workshop/api/mechanic/mechanic_report?report_id=2"
+      method: "GET"
+    setup:
+      needs_auth: true
+      needs_lab: "crapi"
+      resource_owner: "user_b"
+      cross_session_accessor: "user_a"
+    ground_truth: "VULNERABLE"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "access_control:two_session_leak_confirmed"
+    expected_limitation: false
+    rationale: "crAPI mechanic report endpoint with report_id=2 allows User A to access a distinct second user record and vehicle VIN across sessions (BOLA / CWE-639)."
 
   - id: "crapi-bola-vehicle-unauth-negative"
     suite: "live"
@@ -235,6 +308,7 @@ cases:
       needs_lab: "crapi"
       resource_owner: "user_b"
       cross_session_accessor: "unauthorized"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "access_control:two_session_enforced"
     expected_limitation: false
@@ -250,6 +324,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "INCONCLUSIVE"
     expected_evidence_substring: "two_session_inconclusive"
     expected_limitation: false
@@ -265,6 +340,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "access_control:two_session_enforced"
     expected_limitation: false
@@ -281,6 +357,7 @@ cases:
       needs_auth: true
       needs_lab: "dvwa"
       security_level: "low"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "INCONCLUSIVE"
     expected_evidence_substring: "two_session_inconclusive"
     expected_limitation: false
@@ -296,6 +373,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "INCONCLUSIVE"
     expected_evidence_substring: "two_session_inconclusive"
     expected_limitation: false
@@ -312,6 +390,7 @@ cases:
     setup:
       needs_auth: true
       needs_lab: "none"
+    ground_truth: "VULNERABLE"
     expected_outcome: "CONFIRMED"
     expected_evidence_substring: "access_control:two_session_leak_confirmed"
     expected_limitation: false
@@ -328,6 +407,7 @@ cases:
     setup:
       needs_auth: true
       needs_lab: "none"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "access_control:two_session_enforced"
     expected_limitation: false
@@ -344,6 +424,7 @@ cases:
     setup:
       needs_auth: true
       needs_lab: "none"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "INCONCLUSIVE"
     expected_evidence_substring: "two_session_inconclusive"
     expected_limitation: false
@@ -359,10 +440,11 @@ cases:
     setup:
       needs_auth: true
       needs_lab: "crapi"
+    ground_truth: "VULNERABLE"
     expected_outcome: "INCONCLUSIVE"
     expected_evidence_substring: "two_session_inconclusive"
     expected_limitation: true
-    rationale: "Known architectural limitation: Target identifier is a 128-bit random UUID path segment. Detector only tests numeric incrementation and cannot guess unlinked random UUIDs."
+    rationale: "Known architectural limitation: Target identifier is a 128-bit random UUID path segment. Detector only tests numeric incrementation and cannot guess unlinked random UUIDs. Ground truth is VULNERABLE; tool non-detection counts as False Negative in overall recall."
 
   - id: "limit-post-json-idor"
     suite: "live"
@@ -377,10 +459,11 @@ cases:
     setup:
       needs_auth: true
       needs_lab: "crapi"
+    ground_truth: "VULNERABLE"
     expected_outcome: "INCONCLUSIVE"
     expected_evidence_substring: "two_session_inconclusive"
     expected_limitation: true
-    rationale: "Known architectural limitation: Multi-tenant action requires POST JSON body manipulation. Detector is GET-only per Section 6.5 design."
+    rationale: "Known architectural limitation: Multi-tenant action requires POST JSON body manipulation. Detector is GET-only per Section 6.5 design. Ground truth is VULNERABLE; tool non-detection counts as False Negative in overall recall."
 
   - id: "limit-header-tenant-routing"
     suite: "unit"
@@ -394,13 +477,14 @@ cases:
     setup:
       needs_auth: true
       needs_lab: "none"
+    ground_truth: "VULNERABLE"
     expected_outcome: "INCONCLUSIVE"
     expected_evidence_substring: "two_session_inconclusive"
     expected_limitation: true
-    rationale: "Known architectural limitation: Tenancy is isolated via HTTP headers rather than URL path/query parameters. Detector only tests path and query parameters."
+    rationale: "Known architectural limitation: Tenancy is isolated via HTTP headers rather than URL path/query parameters. Detector only tests path and query parameters. Ground truth is VULNERABLE; tool non-detection counts as False Negative in overall recall."
 
   # ============================================================================
-  # Secret Detection (12 Cases: 7 Live, 3 Unit, 2 Limitations)
+  # Secret Detection (14 Cases: 9 Live, 3 Unit, 2 Limitations)
   # ============================================================================
   - id: "juiceshop-login-jwt-live-positive"
     suite: "live"
@@ -415,10 +499,30 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "VULNERABLE"
     expected_outcome: "CONFIRMED"
     expected_evidence_substring: "jwt_token:CONFIRMED"
     expected_limitation: false
-    rationale: "Live Juice Shop login returns authentic JWT with RS256 header and valid base64url JSON payload. Promoted to CONFIRMED via structural validation."
+    rationale: "Live Juice Shop admin login returns authentic JWT with RS256 header and valid base64url JSON payload. Promoted to CONFIRMED via structural validation."
+
+  - id: "juiceshop-user-jwt-live-positive"
+    suite: "live"
+    target: "http://localhost:3000"
+    detector: "secret_detection"
+    request:
+      endpoint: "/rest/user/login"
+      method: "POST"
+      json_body:
+        email: "eval_user_1@juice-sh.op"
+        password: "User1!Pass123"
+    setup:
+      needs_auth: false
+      needs_lab: "juiceshop"
+    ground_truth: "VULNERABLE"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "jwt_token:CONFIRMED"
+    expected_limitation: false
+    rationale: "Live Juice Shop user login returns authentic cryptographic JWT with valid JSON header/payload. Promoted to CONFIRMED via structural validation."
 
   - id: "crapi-login-jwt-live-positive"
     suite: "live"
@@ -430,10 +534,29 @@ cases:
     setup:
       needs_auth: true
       needs_lab: "crapi"
+      user_key: "user_a"
+    ground_truth: "VULNERABLE"
     expected_outcome: "CONFIRMED"
     expected_evidence_substring: "jwt_token:CONFIRMED"
     expected_limitation: false
-    rationale: "Live crAPI login response contains authentic JWT whose header and payload decode to valid JSON objects. Promoted to CONFIRMED via structural validation."
+    rationale: "Live crAPI User A login response contains authentic JWT whose header and payload decode to valid JSON objects. Promoted to CONFIRMED via structural validation."
+
+  - id: "crapi-login-jwt-user-b-positive"
+    suite: "live"
+    target: "http://localhost:8888"
+    detector: "secret_detection"
+    request:
+      endpoint: "/identity/api/auth/login"
+      method: "POST"
+    setup:
+      needs_auth: true
+      needs_lab: "crapi"
+      user_key: "user_b"
+    ground_truth: "VULNERABLE"
+    expected_outcome: "CONFIRMED"
+    expected_evidence_substring: "jwt_token:CONFIRMED"
+    expected_limitation: false
+    rationale: "Live crAPI User B login response contains authentic JWT token whose structure decodes to valid JSON payload. Promoted to CONFIRMED via structural validation."
 
   - id: "juiceshop-ftp-directory-negative"
     suite: "live"
@@ -445,6 +568,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "no_secrets_found"
     expected_limitation: false
@@ -460,6 +584,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "juiceshop"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "no_secrets_found"
     expected_limitation: false
@@ -475,6 +600,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "dvwa"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "no_secrets_found"
     expected_limitation: false
@@ -491,6 +617,7 @@ cases:
       needs_auth: true
       needs_lab: "dvwa"
       security_level: "low"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "no_secrets_found"
     expected_limitation: false
@@ -506,6 +633,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "crapi"
+    ground_truth: "NOT_VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "no_secrets_found"
     expected_limitation: false
@@ -522,6 +650,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "none"
+    ground_truth: "VULNERABLE"
     expected_outcome: "HYPOTHESIS"
     expected_evidence_substring: "aws_access_key:HYPOTHESIS"
     expected_limitation: false
@@ -538,6 +667,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "none"
+    ground_truth: "VULNERABLE"
     expected_outcome: "HYPOTHESIS"
     expected_evidence_substring: "database_url:HYPOTHESIS"
     expected_limitation: false
@@ -554,6 +684,7 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "none"
+    ground_truth: "VULNERABLE"
     expected_outcome: "CONFIRMED"
     expected_evidence_substring: "jwt_token:CONFIRMED"
     expected_limitation: false
@@ -570,10 +701,11 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "none"
+    ground_truth: "VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "no_secrets_found"
     expected_limitation: true
-    rationale: "Known architectural limitation: High-entropy opaque random string without standard keyword prefix (AKIA, Bearer, etc.). Regex-based detector misses high-entropy random secrets without Shannon entropy analysis."
+    rationale: "Known architectural limitation: High-entropy opaque random string without standard keyword prefix (AKIA, Bearer, etc.). Regex-based detector misses high-entropy random secrets without Shannon entropy analysis. Ground truth is VULNERABLE; tool non-detection counts as False Negative in overall recall."
 
   - id: "limit-obfuscated-base64-secret"
     suite: "unit"
@@ -586,7 +718,8 @@ cases:
     setup:
       needs_auth: false
       needs_lab: "none"
+    ground_truth: "VULNERABLE"
     expected_outcome: "NOT_VULNERABLE"
     expected_evidence_substring: "no_secrets_found"
     expected_limitation: true
-    rationale: "Known architectural limitation: Secret is encoded in base64 within JavaScript atob(...) wrapper. Detector scans raw HTTP text and does not execute client JavaScript or deobfuscate strings."
+    rationale: "Known architectural limitation: Secret is encoded in base64 within JavaScript atob(...) wrapper. Detector scans raw HTTP text and does not execute client JavaScript or deobfuscate strings. Ground truth is VULNERABLE; tool non-detection counts as False Negative in overall recall."

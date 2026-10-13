@@ -1,0 +1,881 @@
+{
+  "timestamp": "2026-10-13T10:59:19.658790Z",
+  "target_lab": "crapi",
+  "target_url": "http://localhost:8888",
+  "budgets_tested": [
+    3,
+    5,
+    8
+  ],
+  "runs_per_budget": 5,
+  "agent_mode": "live_gemini",
+  "model_name": "gemini-3.5-flash-lite",
+  "results_by_budget": {
+    "3": {
+      "budget": 3,
+      "runs": 5,
+      "deterministic": {
+        "steps": {
+          "mean": 3.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 5.8,
+          "stdev": 0.4472
+        },
+        "valid_findings": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 1.148,
+          "stdev": 0.4233
+        },
+        "tokens": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "excluded_runs": 0
+      },
+      "agent": {
+        "steps": {
+          "mean": 3.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 6.0,
+          "stdev": 0.0
+        },
+        "valid_findings": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 17.364,
+          "stdev": 5.624
+        },
+        "tokens": {
+          "mean": 6231.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.0005,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "excluded_runs": 0
+      }
+    },
+    "5": {
+      "budget": 5,
+      "runs": 5,
+      "deterministic": {
+        "steps": {
+          "mean": 5.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 6.0,
+          "stdev": 0.0
+        },
+        "valid_findings": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 1.46,
+          "stdev": 0.3683
+        },
+        "tokens": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "excluded_runs": 0
+      },
+      "agent": {
+        "steps": {
+          "mean": 5.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 6.2,
+          "stdev": 0.4472
+        },
+        "valid_findings": {
+          "mean": 0.2,
+          "stdev": 0.4472
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 5.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 18.33,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 11.1,
+          "stdev": 1.9002
+        },
+        "tokens": {
+          "mean": 12663.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.001,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "excluded_runs": 0
+      }
+    },
+    "8": {
+      "budget": 8,
+      "runs": 5,
+      "deterministic": {
+        "steps": {
+          "mean": 8.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 6.6,
+          "stdev": 0.5477
+        },
+        "valid_findings": {
+          "mean": 0.6,
+          "stdev": 0.5477
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 8.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 8.77,
+          "stdev": 0.0954
+        },
+        "wall_time": {
+          "mean": 2.004,
+          "stdev": 0.0598
+        },
+        "tokens": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "excluded_runs": 0
+      },
+      "agent": {
+        "steps": {
+          "mean": 8.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 7.0,
+          "stdev": 0.0
+        },
+        "valid_findings": {
+          "mean": 1.0,
+          "stdev": 0.0
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 7.4,
+          "stdev": 0.5477
+        },
+        "seconds_to_first_valid": {
+          "mean": 56.508,
+          "stdev": 5.4915
+        },
+        "wall_time": {
+          "mean": 46.438,
+          "stdev": 5.5028
+        },
+        "tokens": {
+          "mean": 22617.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.0018,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "excluded_runs": 0
+      }
+    }
+  },
+  "raw_runs": [
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 1,
+      "scan_id": "3c477c15-bf96-4eb2-8496-b914ebf98e3d",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 1.71,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 2,
+      "scan_id": "bb90d99f-59b5-49c9-9dff-f357f708e3be",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 1.12,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 3,
+      "scan_id": "7afbef61-3fd4-40c2-ab39-22f9600c5cf3",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 1.42,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 4,
+      "scan_id": "cda520b2-af8a-4fb3-9085-a01bb8d32c49",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 5,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 0.72,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 5,
+      "scan_id": "b7efa8dd-984f-487e-9dc2-c603df441844",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 0.77,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 1,
+      "scan_id": "add994af-6c47-4e4b-aa7e-214bdcc62eac",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 18.21,
+      "tokens": 6231,
+      "cost": 0.0005,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 2,
+      "scan_id": "e8c8e311-cbca-4cf2-ab15-650dc148d278",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 15.01,
+      "tokens": 6231,
+      "cost": 0.0005,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 3,
+      "scan_id": "1c7ed526-d632-40c4-9023-8a7ae85dbdf4",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 14.85,
+      "tokens": 6231,
+      "cost": 0.0005,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 4,
+      "scan_id": "1e000abc-2f3d-4762-8fe2-1bea53466164",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 26.65,
+      "tokens": 6231,
+      "cost": 0.0005,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 5,
+      "scan_id": "56f23b03-bf75-46be-9e77-1895ddbb1155",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 3,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 12.1,
+      "tokens": 6231,
+      "cost": 0.0005,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 1,
+      "scan_id": "16d8fa49-eec8-409c-9636-edd505ca5411",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 2.11,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 2,
+      "scan_id": "4dbd5123-ce25-4017-bc5a-77562c9aff05",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 1.25,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 3,
+      "scan_id": "8682a31a-aa3d-41be-adca-b1faf0c4c520",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 1.4,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 4,
+      "scan_id": "f5b00c1b-c5f4-4185-9b2a-078b68234232",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 1.28,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 5,
+      "scan_id": "483baa3f-9c19-41e4-be39-5f9a92dfe77f",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 1.26,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 1,
+      "scan_id": "cc733099-2282-45e8-ad1f-e6cb5033141d",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 9.58,
+      "tokens": 12663,
+      "cost": 0.001,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 2,
+      "scan_id": "e15dea26-4e1e-4dc8-b528-86c3ffdb0ad5",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 5,
+      "seconds_to_first_valid": 18.33,
+      "wall_time": 9.48,
+      "tokens": 12663,
+      "cost": 0.001,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 3,
+      "scan_id": "3d8bbfd0-15e8-4013-abf7-05b67242afa6",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 10.55,
+      "tokens": 12663,
+      "cost": 0.001,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 4,
+      "scan_id": "60769f4d-4622-48b1-b274-bb11e78b3b97",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 11.85,
+      "tokens": 12663,
+      "cost": 0.001,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 5,
+      "scan_id": "f4d8c1a5-d65f-41c4-80d0-b76fd319bf8f",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 5,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 14.04,
+      "tokens": 12663,
+      "cost": 0.001,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 1,
+      "scan_id": "6d4f6e46-a347-4813-90a3-34b9b6681d30",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 8,
+      "seconds_to_first_valid": 8.66,
+      "wall_time": 1.97,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 2,
+      "scan_id": "4b3eb972-bba0-4e24-ae79-d56406182eff",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 8,
+      "seconds_to_first_valid": 8.82,
+      "wall_time": 1.97,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 3,
+      "scan_id": "03f0053d-9e5d-41c5-9c49-327f6d18868f",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 1.98,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 4,
+      "scan_id": "e8eece6d-8ac8-4eba-8163-0a7bbe941442",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 6,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 1.99,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 5,
+      "scan_id": "3446fb35-d55d-48b8-8adf-572eb5abf1a3",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 8,
+      "seconds_to_first_valid": 8.83,
+      "wall_time": 2.11,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 1,
+      "scan_id": "52be6c11-dc35-4ab6-ac9c-228b5f05620c",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 7,
+      "seconds_to_first_valid": 62.54,
+      "wall_time": 55.57,
+      "tokens": 22617,
+      "cost": 0.0018,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 2,
+      "scan_id": "d54a8293-0635-4b6c-b067-2d2493d49c61",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 7,
+      "seconds_to_first_valid": 49.96,
+      "wall_time": 44.39,
+      "tokens": 22617,
+      "cost": 0.0018,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 3,
+      "scan_id": "2fe967fb-91a5-4b78-8e78-89c6b5049154",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 8,
+      "seconds_to_first_valid": 61.72,
+      "wall_time": 47.37,
+      "tokens": 22617,
+      "cost": 0.0018,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 4,
+      "scan_id": "a5e7d7da-3ce1-4743-9d68-7d64ecc64ef1",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 7,
+      "seconds_to_first_valid": 52.9,
+      "wall_time": 42.95,
+      "tokens": 22617,
+      "cost": 0.0018,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 5,
+      "scan_id": "595844f7-2bb5-4117-a244-798c23cc76bf",
+      "is_valid": true,
+      "status": "VALID",
+      "steps": 8,
+      "nodes": 7,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 8,
+      "seconds_to_first_valid": 55.42,
+      "wall_time": 41.91,
+      "tokens": 22617,
+      "cost": 0.0018,
+      "refusals": 0,
+      "duplicate_actions": 0
+    }
+  ]
+}

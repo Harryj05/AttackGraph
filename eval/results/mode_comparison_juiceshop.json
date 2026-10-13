@@ -1,0 +1,815 @@
+{
+  "timestamp": "2026-10-13T10:36:57.917393Z",
+  "target_lab": "juiceshop",
+  "target_url": "http://localhost:3000",
+  "budgets_tested": [
+    3,
+    5,
+    8
+  ],
+  "runs_per_budget": 5,
+  "agent_mode": "live_gemini",
+  "model_name": "gemini-3.5-flash-lite",
+  "results_by_budget": {
+    "3": {
+      "budget": 3,
+      "runs": 5,
+      "deterministic": {
+        "steps": {
+          "mean": 3.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 8.0,
+          "stdev": 0.0
+        },
+        "valid_findings": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 12.768,
+          "stdev": 0.1545
+        },
+        "tokens": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        }
+      },
+      "agent": {
+        "steps": {
+          "mean": 3.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 8.0,
+          "stdev": 0.0
+        },
+        "valid_findings": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 19.748,
+          "stdev": 0.5858
+        },
+        "tokens": {
+          "mean": 6993.0,
+          "stdev": 54.7859
+        },
+        "cost": {
+          "mean": 0.0006,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        }
+      }
+    },
+    "5": {
+      "budget": 5,
+      "runs": 5,
+      "deterministic": {
+        "steps": {
+          "mean": 5.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 8.0,
+          "stdev": 0.0
+        },
+        "valid_findings": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 13.626,
+          "stdev": 0.9585
+        },
+        "tokens": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        }
+      },
+      "agent": {
+        "steps": {
+          "mean": 5.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 8.2,
+          "stdev": 0.4472
+        },
+        "valid_findings": {
+          "mean": 0.2,
+          "stdev": 0.4472
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 5.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 25.69,
+          "stdev": 0.0
+        },
+        "wall_time": {
+          "mean": 23.954,
+          "stdev": 1.0308
+        },
+        "tokens": {
+          "mean": 15025.2,
+          "stdev": 71.3982
+        },
+        "cost": {
+          "mean": 0.0012,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        }
+      }
+    },
+    "8": {
+      "budget": 8,
+      "runs": 5,
+      "deterministic": {
+        "steps": {
+          "mean": 8.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 9.0,
+          "stdev": 0.0
+        },
+        "valid_findings": {
+          "mean": 1.0,
+          "stdev": 0.0
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 4.0,
+          "stdev": 0.0
+        },
+        "seconds_to_first_valid": {
+          "mean": 13.712,
+          "stdev": 0.0998
+        },
+        "wall_time": {
+          "mean": 14.008,
+          "stdev": 0.092
+        },
+        "tokens": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "cost": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        }
+      },
+      "agent": {
+        "steps": {
+          "mean": 8.0,
+          "stdev": 0.0
+        },
+        "nodes": {
+          "mean": 9.6,
+          "stdev": 0.5477
+        },
+        "valid_findings": {
+          "mean": 1.6,
+          "stdev": 0.5477
+        },
+        "false_positives": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "steps_to_first_valid": {
+          "mean": 5.4,
+          "stdev": 0.5477
+        },
+        "seconds_to_first_valid": {
+          "mean": 24.304,
+          "stdev": 1.1932
+        },
+        "wall_time": {
+          "mean": 30.294,
+          "stdev": 0.9892
+        },
+        "tokens": {
+          "mean": 27456.6,
+          "stdev": 554.2439
+        },
+        "cost": {
+          "mean": 0.0022,
+          "stdev": 0.0
+        },
+        "refusals": {
+          "mean": 0.0,
+          "stdev": 0.0
+        },
+        "duplicate_actions": {
+          "mean": 0.0,
+          "stdev": 0.0
+        }
+      }
+    }
+  },
+  "raw_runs": [
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 1,
+      "scan_id": "cf72df47-2b7e-4331-a516-0dea1f2b1404",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 13.01,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 1,
+      "scan_id": "ae215b6b-385a-4845-b885-bb6c884e40a9",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 20.47,
+      "tokens": 6972,
+      "cost": 0.00057,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 2,
+      "scan_id": "0183136a-4a2c-43bb-877c-787927cb5e64",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 12.81,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 2,
+      "scan_id": "dfc1cca2-8c07-4c11-adaf-a1b1b4b57570",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 19.1,
+      "tokens": 7044,
+      "cost": 0.000587,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 3,
+      "scan_id": "c9392eff-c479-4efc-a0ae-a2dfa7fbd25d",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 12.6,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 3,
+      "scan_id": "215c7b1d-2e6b-4c05-9a79-c9b503250f24",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 19.23,
+      "tokens": 7021,
+      "cost": 0.00059,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 4,
+      "scan_id": "548850e0-b901-43ac-8fb3-1fb5ef5582f7",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 12.7,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 4,
+      "scan_id": "2c8e2332-d161-47fc-a608-1d1abcade2bc",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 20.15,
+      "tokens": 6907,
+      "cost": 0.000561,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "deterministic",
+      "run": 5,
+      "scan_id": "180a7252-18b3-4052-8bb2-fdc99834741a",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 12.72,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 3,
+      "mode": "agent",
+      "run": 5,
+      "scan_id": "5e526258-b827-4cc9-a3f2-48ef5e014e24",
+      "steps": 3,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 19.79,
+      "tokens": 7021,
+      "cost": 0.000582,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 1,
+      "scan_id": "b480e95b-e1d4-4657-98c9-ab9ab3064293",
+      "steps": 5,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 13.23,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 1,
+      "scan_id": "da5a4880-cc62-4a72-9922-82323b6488c3",
+      "steps": 5,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 23.86,
+      "tokens": 14912,
+      "cost": 0.00119,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 2,
+      "scan_id": "9bada679-079f-4a8b-bade-7b5f8124a348",
+      "steps": 5,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 15.34,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 2,
+      "scan_id": "a092f6a3-404a-4fb1-a3d6-a6093b3c291c",
+      "steps": 5,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 23.65,
+      "tokens": 15004,
+      "cost": 0.001199,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 3,
+      "scan_id": "bae81898-f010-43fb-8645-fd53bca0654e",
+      "steps": 5,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 13.2,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 3,
+      "scan_id": "99afabf2-be00-4670-b114-6f416652b819",
+      "steps": 5,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 23.59,
+      "tokens": 15086,
+      "cost": 0.001216,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 4,
+      "scan_id": "6baea98e-79a2-452c-901b-265673a0691a",
+      "steps": 5,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 13.2,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 4,
+      "scan_id": "695f8319-90e3-4483-9d27-5cb9b60ef3de",
+      "steps": 5,
+      "nodes": 9,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 5,
+      "seconds_to_first_valid": 25.69,
+      "wall_time": 25.7,
+      "tokens": 15081,
+      "cost": 0.001228,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "deterministic",
+      "run": 5,
+      "scan_id": "0590c12c-09a3-4862-8901-155d0e761133",
+      "steps": 5,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 13.16,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 5,
+      "mode": "agent",
+      "run": 5,
+      "scan_id": "b277247b-f4fc-4bbb-a412-52f47e33a1f1",
+      "steps": 5,
+      "nodes": 8,
+      "valid_findings": 0,
+      "false_positives": 0,
+      "steps_to_first_valid": null,
+      "seconds_to_first_valid": null,
+      "wall_time": 22.97,
+      "tokens": 15043,
+      "cost": 0.001203,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 1,
+      "scan_id": "1d5f010b-a3f5-408f-988f-238592133903",
+      "steps": 8,
+      "nodes": 9,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 4,
+      "seconds_to_first_valid": 13.62,
+      "wall_time": 13.94,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 1,
+      "scan_id": "34d8db3c-35b6-4b16-892a-359ddc2673f3",
+      "steps": 8,
+      "nodes": 9,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 6,
+      "seconds_to_first_valid": 25.48,
+      "wall_time": 29.84,
+      "tokens": 27149,
+      "cost": 0.002165,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 2,
+      "scan_id": "81cf5fc7-93e3-4ebf-a03d-a39d1abb7164",
+      "steps": 8,
+      "nodes": 9,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 4,
+      "seconds_to_first_valid": 13.78,
+      "wall_time": 14.08,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 2,
+      "scan_id": "bf2f5842-fa0d-46c7-ae1a-eaacfdbcbc0f",
+      "steps": 8,
+      "nodes": 10,
+      "valid_findings": 2,
+      "false_positives": 0,
+      "steps_to_first_valid": 5,
+      "seconds_to_first_valid": 25.5,
+      "wall_time": 31.97,
+      "tokens": 27379,
+      "cost": 0.00221,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 3,
+      "scan_id": "677c71d3-d810-4881-83c7-a6293f349147",
+      "steps": 8,
+      "nodes": 9,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 4,
+      "seconds_to_first_valid": 13.85,
+      "wall_time": 14.13,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 3,
+      "scan_id": "081dae1c-5aa0-49e6-b99e-e38e5eec7f2a",
+      "steps": 8,
+      "nodes": 9,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 6,
+      "seconds_to_first_valid": 24.29,
+      "wall_time": 29.39,
+      "tokens": 26752,
+      "cost": 0.002132,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 4,
+      "scan_id": "f1b40b69-45ab-47cf-b184-46eedcc26a46",
+      "steps": 8,
+      "nodes": 9,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 4,
+      "seconds_to_first_valid": 13.63,
+      "wall_time": 13.92,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 4,
+      "scan_id": "4cb19ba9-c18f-4991-a8e2-47c19b46719a",
+      "steps": 8,
+      "nodes": 10,
+      "valid_findings": 2,
+      "false_positives": 0,
+      "steps_to_first_valid": 5,
+      "seconds_to_first_valid": 22.9,
+      "wall_time": 30.26,
+      "tokens": 28139,
+      "cost": 0.002253,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "deterministic",
+      "run": 5,
+      "scan_id": "52318c4b-c97d-47a0-8ffb-99c7faf09683",
+      "steps": 8,
+      "nodes": 9,
+      "valid_findings": 1,
+      "false_positives": 0,
+      "steps_to_first_valid": 4,
+      "seconds_to_first_valid": 13.68,
+      "wall_time": 13.97,
+      "tokens": 0,
+      "cost": 0.0,
+      "refusals": 0,
+      "duplicate_actions": 0
+    },
+    {
+      "budget": 8,
+      "mode": "agent",
+      "run": 5,
+      "scan_id": "0be7563c-4320-4ff5-ac39-d32c000575c4",
+      "steps": 8,
+      "nodes": 10,
+      "valid_findings": 2,
+      "false_positives": 0,
+      "steps_to_first_valid": 5,
+      "seconds_to_first_valid": 23.35,
+      "wall_time": 30.01,
+      "tokens": 27864,
+      "cost": 0.002212,
+      "refusals": 0,
+      "duplicate_actions": 0
+    }
+  ]
+}

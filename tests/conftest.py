@@ -1,5 +1,9 @@
+import os
 import pytest
 from starlette.testclient import TestClient
+
+os.environ.setdefault("ATTACKGRAPH_API_KEY", "attackgraph-insecure-dev-key")
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 _orig_request = TestClient.request
 

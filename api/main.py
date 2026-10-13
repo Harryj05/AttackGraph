@@ -2,13 +2,23 @@ import os
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.auth import verify_api_key
+from contextlib import asynccontextmanager
+from api.auth import verify_api_key, get_configured_api_key
 from api.routes import scans, calibration, pattern_stats
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Strict fail-closed security: refuse to start without an API key configured
+    get_configured_api_key()
+    yield
+
 
 app = FastAPI(
     title="AttackGraph AI API",
     description="Controlled Security Analysis Platform — Server-side allowlist protected",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan,
 )
 
 # CORS: Configured from env with strict localhost default, never wildcard
@@ -23,7 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Protected routes require valid X-API-Key (or ?api_key= query param)
+# Protected routes require valid X-API-Key header (query parameter authentication disallowed)
 app.include_router(scans.router, dependencies=[Depends(verify_api_key)])
 app.include_router(calibration.router, dependencies=[Depends(verify_api_key)])
 app.include_router(pattern_stats.router, dependencies=[Depends(verify_api_key)])

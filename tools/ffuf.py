@@ -42,20 +42,13 @@ def probe_calibration_baseline(target_base: str) -> Dict[str, Any]:
     Probes a deliberately nonexistent path to detect SPA catch-all response sizes.
     Returns structured calibration dict with probe_status, baseline_size, and error details.
     """
+    import httpx
     bogus_url = f"{target_base}/this-path-should-never-exist-xyz123"
     try:
-        req = urllib.request.Request(bogus_url, headers={"User-Agent": "ffuf-calibration"})
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            body = resp.read()
-            return {
-                "probe_status": resp.status,
-                "baseline_size": len(body) if resp.status == 200 else None,
-                "error": None
-            }
-    except urllib.error.HTTPError as e:
+        resp = httpx.get(bogus_url, headers={"User-Agent": "ffuf-calibration"}, timeout=5.0, follow_redirects=False)
         return {
-            "probe_status": e.code,
-            "baseline_size": None,
+            "probe_status": resp.status_code,
+            "baseline_size": len(resp.content) if resp.status_code == 200 else None,
             "error": None
         }
     except Exception as e:

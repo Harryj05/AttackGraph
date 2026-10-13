@@ -12,7 +12,7 @@ import {
   FileText,
   Download
 } from 'lucide-react';
-import { getExportSarifUrl, getExportPdfUrl } from '../api/client';
+import { downloadExportReport } from '../api/client';
 
 interface FindingsViewProps {
   scanId?: string;
@@ -27,6 +27,19 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
   edges,
   onSelectFindingNode,
 }) => {
+  const [downloadingFormat, setDownloadingFormat] = useState<'pdf' | 'sarif' | null>(null);
+
+  const handleDownload = async (format: 'pdf' | 'sarif') => {
+    if (!scanId) return;
+    try {
+      setDownloadingFormat(format);
+      await downloadExportReport(scanId, format);
+    } catch (err) {
+      console.error(`Failed to export ${format}:`, err);
+    } finally {
+      setDownloadingFormat(null);
+    }
+  };
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [sortField, setSortField] = useState<'confidence' | 'time'>('confidence');
@@ -174,24 +187,26 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
         <div className="flex flex-wrap items-center gap-3">
           {scanId && (
             <div className="flex items-center gap-2 mr-2">
-              <a
-                href={getExportPdfUrl(scanId)}
-                download
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-semibold hover:bg-rose-500/25 transition-all shadow-sm"
-                title="Download Executive Summary PDF Report"
+              <button
+                type="button"
+                onClick={() => handleDownload('pdf')}
+                disabled={downloadingFormat !== null}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-semibold hover:bg-rose-500/25 transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+                title="Download Executive Summary PDF Report via authenticated stream"
               >
                 <FileText className="w-3.5 h-3.5" />
-                <span>Export PDF</span>
-              </a>
-              <a
-                href={getExportSarifUrl(scanId)}
-                download
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-xs font-semibold hover:bg-indigo-500/25 transition-all shadow-sm"
-                title="Download OASIS SARIF v2.1.0 JSON"
+                <span>{downloadingFormat === 'pdf' ? 'Exporting...' : 'Export PDF'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownload('sarif')}
+                disabled={downloadingFormat !== null}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-xs font-semibold hover:bg-indigo-500/25 transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+                title="Download OASIS SARIF v2.1.0 JSON via authenticated stream"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Export SARIF</span>
-              </a>
+                <span>{downloadingFormat === 'sarif' ? 'Exporting...' : 'Export SARIF'}</span>
+              </button>
             </div>
           )}
 

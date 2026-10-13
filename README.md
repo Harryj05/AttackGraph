@@ -18,97 +18,117 @@ The platform separates the **Asset Layer** (services, endpoints) from the **Atta
 
 ## 1. Measured Evaluation Results (`python -m eval.run`)
 
-All metrics below are generated directly by the live evaluation harness v2 against running local lab instances (**OWASP Juice Shop** on `:3000`, **Damn Vulnerable Web Application / DVWA** on `:8080`, and **crAPI** on `:8888`), unit fixtures, and verified architectural limitations.
+## 1. Measured Evaluation Results (`python -m eval.run`)
+
+All metrics below are generated directly by the live evaluation harness v2 against running local lab instances (**OWASP Juice Shop** on `:3000`, **Damn Vulnerable Web Application / DVWA** on `:8080`, and **crAPI** on `:8888`), synthetic unit fixtures, and verified architectural limitations.
 
 > [!WARNING]
-> **Honest Evaluation Scope Disclaimer**: The evaluation suite consists of **36 curated cases** (20 live, 9 unit, 7 known limitations). High accuracy on this benchmark **does NOT prove** enterprise coverage, zero-day discovery, or immunity to evasion. Specifically, it does not prove resilience against runtime JS obfuscation, client-side DOM sinks, non-sequential UUID discovery, POST JSON IDOR, blind SSRF, second-order injections, or stateful multi-step business logic exploits. High metrics reflect adherence to conservative ground-truth rules within narrow, well-defined boundaries.
+> **Honest Evaluation Scope Disclaimer**: The evaluation benchmark consists of **41 curated cases** (25 live lab targets, 9 unit fixtures, 7 known limitations). High accuracy on this benchmark **does NOT prove** enterprise coverage, zero-day discovery, or immunity to evasion. Specifically, it does not prove resilience against runtime JS obfuscation, client-side DOM sinks, non-sequential UUID discovery, POST JSON IDOR, blind SSRF, second-order injections, or stateful multi-step business logic exploits. High metrics reflect adherence to conservative ground-truth rules within narrow, well-defined boundaries.
 
-### Structural Validation Rule for Secrets
-Regex pattern matches produce state **`HYPOTHESIS`** by default (e.g. AWS Access Key ID format `AKIA...`, database URLs, API key assignments). Only secrets whose internal structure can be decoded and verified offline (e.g., JWT header and payload base64url decode into valid JSON objects with `"alg"` or `"typ"`) are promoted to **`CONFIRMED`**.
+### Dual-Recall Evaluation Methodology & Wilson 95% CIs
+To prevent overclaiming, we report **Dual Recall** with **Wilson score 95% confidence intervals**:
+1. **In-Scope Recall**: Measures detector accuracy against endpoints that satisfy its architectural preconditions (excluding known blind spots).
+2. **Overall Recall**: Evaluates comprehensive vulnerability coverage by penalizing the tool—classifying all architectural blind spots within the target category as **False Negatives ($FN$)**.
 
 ---
 
-### [1] LIVE Target Suite Metrics (N=20 Live Lab Responses)
-Evaluated strictly against real HTTP responses from live Docker containers (including live login JWTs from Juice Shop and crAPI, `/ftp` directory listings, `/robots.txt`, and authenticated multi-tenant APIs):
+### [1] LIVE Target Suite Metrics (N=25 Live Lab Responses)
+Evaluated strictly against real HTTP responses from live Docker containers (including Juice Shop basket BOLA, crAPI mechanic report BOLA, vehicle location BOLA, live login JWTs from Juice Shop and crAPI, and encoded reflection defenses):
 
-| Detector | TP (N) | FP (N) | TN (N) | FN (N) | Precision (N) | Recall (N) | FPR (N) | Live Benchmark Targets |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **`access_control_check`** | 1 | 0 | 5 | 0 | **100.0%** (N=1) | **100.0%** (N=1) | **0.0%** (N=5) | crAPI BOLA coordinates (pos/neg), Juice Shop search & basket, DVWA SQLi |
-| **`reflected_input_check`** | 2 | 0 | 5 | 0 | **100.0%** (N=2) | **100.0%** (N=2) | **0.0%** (N=5) | DVWA Low/Medium (pos), DVWA Impossible (neg), Juice Shop search/orders |
-| **`secret_detection`** | 2 | 0 | 5 | 0 | **100.0%** (N=2) | **100.0%** (N=2) | **0.0%** (N=5) | Juice Shop & crAPI login JWTs (pos), `/ftp`, `/robots.txt`, login forms |
-| **Live Suite Subtotal** | **5** | **0** | **15** | **0** | **100.0%** (N=5) | **100.0%** (N=5) | **0.0%** (N=15) | **20 / 20 Live Cases Passed (100%)** |
+| Detector | TP | FP | TN | FN (In-Scope) | FN (Overall) | Precision (95% CI) | In-Scope Recall (95% CI) | Overall Recall (95% CI) | FPR (N) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **`access_control_check`** | 4 | 0 | 5 | 0 | 2 | **100.0%** [51.0%–100.0%] (N=4) | **100.0%** [51.0%–100.0%] (N=4) | **66.7%** [30.0%–90.3%] (N=6) | **0.0%** (N=5) |
+| **`reflected_input_check`** | 2 | 0 | 5 | 0 | 2 | **100.0%** [34.2%–100.0%] (N=2) | **100.0%** [34.2%–100.0%] (N=2) | **50.0%** [15.0%–85.0%] (N=4) | **0.0%** (N=5) |
+| **`secret_detection`** | 4 | 0 | 5 | 0 | 0 | **100.0%** [51.0%–100.0%] (N=4) | **100.0%** [51.0%–100.0%] (N=4) | **100.0%** [51.0%–100.0%] (N=4) | **0.0%** (N=5) |
+| **Live Suite Subtotal** | **10** | **0** | **15** | **0** | **4** | **100.0%** [72.2%–100.0%] (N=10) | **100.0%** [72.2%–100.0%] (N=10) | **71.4%** [45.4%–88.3%] (N=14) | **0.0%** (N=15) |
+
+*Live targets tested:* Juice Shop 2-user basket BOLA (`/rest/basket/{basket_id}`), crAPI mechanic report BOLA (`/workshop/api/mechanic/mechanic_report?report_id=1`), crAPI vehicle location (`/identity/api/v2/vehicle/{id}/location`), DVWA low/medium/impossible XSS, Juice Shop search/orders/echo, and Juice Shop / crAPI login JWTs. **All 25 live cases passed.**
 
 ---
 
 ### [2] UNIT / Synthetic Suite Metrics (N=9 Isolated Fixtures)
 Evaluated against isolated synthetic payloads to verify edge-case parsing, structural decoding, and tenancy boundaries:
 
-| Detector | TP (N) | FP (N) | TN (N) | FN (N) | Precision (N) | Recall (N) | FPR (N) | Target Scope |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **`access_control_check`** | 1 | 0 | 2 | 0 | **100.0%** (N=1) | **100.0%** (N=1) | **0.0%** (N=2) | Numeric tenant profile leak (pos), 403 boundary (neg), identical public (inconclusive) |
-| **`reflected_input_check`** | 2 | 0 | 1 | 0 | **100.0%** (N=2) | **100.0%** (N=2) | **0.0%** (N=1) | HTML attribute breakout (pos), script block breakout (pos), entity-encoded (neg) |
-| **`secret_detection`** | 3 | 0 | 0 | 0 | **100.0%** (N=3) | **100.0%** (N=3) | **0.0%** (N=0) | Valid JWT (CONFIRMED), AWS Key ID (HYPOTHESIS), DB URI (HYPOTHESIS) |
-| **Unit Suite Subtotal** | **6** | **0** | **3** | **0** | **100.0%** (N=6) | **100.0%** (N=6) | **0.0%** (N=3) | **9 / 9 Unit Cases Passed (100%)** |
+| Detector | TP | FP | TN | FN (In-Scope) | FN (Overall) | Precision (95% CI) | In-Scope Recall (95% CI) | Overall Recall (95% CI) | FPR (N) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **`access_control_check`** | 1 | 0 | 2 | 0 | 1 | **100.0%** [20.6%–100.0%] (N=1) | **100.0%** [20.6%–100.0%] (N=1) | **50.0%** [9.4%–90.5%] (N=2) | **0.0%** (N=2) |
+| **`reflected_input_check`** | 2 | 0 | 1 | 0 | 0 | **100.0%** [34.2%–100.0%] (N=2) | **100.0%** [34.2%–100.0%] (N=2) | **100.0%** [34.2%–100.0%] (N=2) | **0.0%** (N=1) |
+| **`secret_detection`** | 3 | 0 | 0 | 0 | 2 | **100.0%** [43.9%–100.0%] (N=3) | **100.0%** [43.9%–100.0%] (N=3) | **60.0%** [23.1%–88.2%] (N=5) | **0.0%** (N=0) |
+| **Unit Suite Subtotal** | **6** | **0** | **3** | **0** | **3** | **100.0%** [61.0%–100.0%] (N=6) | **100.0%** [61.0%–100.0%] (N=6) | **66.7%** [35.4%–87.9%] (N=9) | **0.0%** (N=3) |
 
 ---
 
 ### [3] KNOWN LIMITATIONS Suite (N=7 Verified Architectural Blindspots)
-Cases where the tool is **expected to be blind or inconclusive**. These are verified to ensure safe, non-crashing, conservative behavior and documented as system limitations rather than failures:
+Cases where the tool is **expected to be blind or inconclusive**. These represent systemic boundaries documented as limitations rather than failures:
 
-| Case ID | Detector | Expected Behavior | Actual Behavior | Architectural Limitation Rationale |
+| Case ID | Detector | Ground Truth | Tool Outcome | Architectural Limitation Rationale |
 | :--- | :--- | :---: | :---: | :--- |
-| `limit-dom-based-reflection` | `reflected_input_check` | `NOT_VULNERABLE` | `NOT_VULNERABLE` | **Client DOM XSS:** Executed purely via Angular SPA `location.hash`; invisible to server-side HTTP probe without headless browser runtime. |
-| `limit-post-json-reflection` | `reflected_input_check` | `NOT_VULNERABLE` | `NOT_VULNERABLE` | **POST JSON Reflections:** Detector only inspects and injects GET query parameters; body reflections in POST JSON APIs are outside scope. |
-| `limit-crapi-uuid-path-idor` | `access_control_check` | `INCONCLUSIVE` | `INCONCLUSIVE` | **Unguessable UUIDs:** Path identifier is a 128-bit random UUID. Detector only increments numeric path segments and cannot brute-force unlinked UUIDs. |
-| `limit-post-json-idor` | `access_control_check` | `INCONCLUSIVE` | `INCONCLUSIVE` | **POST Body IDOR:** Multi-tenant endpoint requires POST JSON body manipulation. Detector is GET-only per Section 6.5 design. |
-| `limit-header-tenant-routing` | `access_control_check` | `INCONCLUSIVE` | `INCONCLUSIVE` | **Header-Based Tenancy:** Isolation is enforced via `X-Tenant-ID` header; detector only tests path and query parameters. |
-| `limit-entropy-high-token` | `secret_detection` | `NOT_VULNERABLE` | `NOT_VULNERABLE` | **High-Entropy Opaque Tokens:** Random bearer string lacking known keyword prefix (`AKIA`, `Bearer`, etc.). Missed without Shannon entropy analysis. |
-| `limit-obfuscated-base64-secret` | `secret_detection` | `NOT_VULNERABLE` | `NOT_VULNERABLE` | **Runtime Obfuscation:** Secret is encoded in base64 within JavaScript `atob(...)`. Raw HTTP text regex cannot deobfuscate client-side JS. |
+| `limit-dom-based-reflection` | `reflected_input_check` | `VULNERABLE` | `NOT_VULNERABLE` | **Client DOM XSS:** Executed purely via Angular SPA `location.hash`; invisible to server-side HTTP probe without headless browser runtime. |
+| `limit-post-json-reflection` | `reflected_input_check` | `VULNERABLE` | `NOT_VULNERABLE` | **POST JSON Reflections:** Detector only inspects and injects GET query parameters; body reflections in POST JSON APIs are outside scope. |
+| `limit-crapi-uuid-path-idor` | `access_control_check` | `VULNERABLE` | `INCONCLUSIVE` | **Unguessable UUIDs:** Path identifier is a 128-bit random UUID. Detector only increments numeric path segments and cannot brute-force unlinked UUIDs. |
+| `limit-post-json-idor` | `access_control_check` | `VULNERABLE` | `INCONCLUSIVE` | **POST Body IDOR:** Multi-tenant endpoint requires POST JSON body manipulation. Detector is GET-only per Section 6.5 design. |
+| `limit-header-tenant-routing` | `access_control_check` | `VULNERABLE` | `INCONCLUSIVE` | **Header-Based Tenancy:** Isolation is enforced via `X-Tenant-ID` header; detector only tests path and query parameters. |
+| `limit-entropy-high-token` | `secret_detection` | `VULNERABLE` | `NOT_VULNERABLE` | **High-Entropy Opaque Tokens:** Random bearer string lacking known keyword prefix (`AKIA`, `Bearer`, etc.). Missed without Shannon entropy analysis. |
+| `limit-obfuscated-base64-secret` | `secret_detection` | `VULNERABLE` | `NOT_VULNERABLE` | **Runtime Obfuscation:** Secret is encoded in base64 within JavaScript `atob(...)`. Raw HTTP text regex cannot deobfuscate client-side JS. |
 
 ---
 
-### Overall Evaluation Summary
-- **Total Suite Cases:** 36 cases
-- **Passed / Verified:** 36 / 36 (100%)
-- **Failing Cases:** 0
-- **Combined Non-Limitation Metrics (N=29):** Precision = **100.0%** (N=11), Recall = **100.0%** (N=11), False Positive Rate = **0.0%** (N=18)
-- **Verified Limitations (N=7):** 7 / 7 handled conservatively according to specification.
+### Combined Benchmark Metrics (N=41 Total Cases)
 
-### Scan Mode Comparison: Deterministic Pipeline vs. Agent Loop
+| Detector | Precision (95% CI) | In-Scope Recall (95% CI) | Overall Recall (95% CI) | FPR (N) | Total Cases Evaluated |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **`access_control_check`** | **100.0%** [56.5%–100.0%] (N=5) | **100.0%** [56.5%–100.0%] (N=5) | **62.5%** [30.6%–86.3%] (N=8) | **0.0%** (N=7) | 15 cases (9 Live, 3 Unit, 3 Limitations) |
+| **`reflected_input_check`** | **100.0%** [51.0%–100.0%] (N=4) | **100.0%** [51.0%–100.0%] (N=4) | **66.7%** [30.0%–90.3%] (N=6) | **0.0%** (N=6) | 12 cases (7 Live, 3 Unit, 2 Limitations) |
+| **`secret_detection`** | **100.0%** [64.6%–100.0%] (N=7) | **100.0%** [64.6%–100.0%] (N=7) | **77.8%** [45.3%–93.7%] (N=9) | **0.0%** (N=5) | 14 cases (9 Live, 3 Unit, 2 Limitations) |
+| **Overall Platform** | **100.0%** [80.6%–100.0%] (N=16) | **100.0%** [80.6%–100.0%] (N=16) | **69.6%** [49.1%–84.4%] (N=23) | **0.0%** (N=18) | **41 / 41 Cases Verified (100%)** |
 
-The harness benchmarks both modes over identical lab targets with equal tool permissions, authenticated credential handles (`user_a`, `user_b`), and equal step limits (`max_steps=10`):
+*Artifact Source:* [`eval/results/latest.json`](eval/results/latest.json).
 
-*Source:* `eval/results/mode_comparison_20261012_210218.json` ($N=5$ runs per mode on **crAPI** `http://localhost:8888`)
+---
 
-| Metric | Deterministic Mode (`fixed pipeline`) | Agent Mode (`Gemini function-calling loop`) | Comparison / Findings |
-| :--- | :---: | :---: | :--- |
-| **Average Wall-Clock Time** | **28.40 s** (±0.4s) | 42.93 s (±0.8s) | Deterministic is ~1.5x faster (no LLM inference latency) |
-| **Average Steps Taken** | 10.0 | **9.0** | Agent terminates early upon completing candidate checks |
-| **Valid Findings (crAPI BOLA)** | **1.0** (100% detection) | **1.0** (100% detection) | Both modes reliably detect `/vehicle/{vehicle_id}/location` |
-| **False Positives** | **0.0** | **0.0** | Zero false positives in both modes |
-| **Missed Known Issues** | **0.0** | **0.0** | Zero missed known issues on discovered routes |
-| **Token Usage & API Cost** | 0 tokens / **$0.00** | 26,380 tokens / $0.0021 | Deterministic mode has zero external LLM cost |
-| **LLM Refusals / Blocks** | 0 | 0.0 | 0 safety refusals under defensive framing |
-| **Guardrail Rejections** | 0.0 | 0.0 | Both modes respect node scoping and duplicate blockers |
-| **Unique / Novel Findings** | 0 novel findings | 0 novel findings | **Objective Assessment:** The agent found **nothing** the deterministic baseline missed. |
+### Scan Mode Comparison: Step-Budget Benchmark (Budgets 3, 5, 8 | N=5 Runs Each)
 
-#### Root Cause of the ~777s Latency & Fix (Not Hidden Behind a Timeout)
-In earlier benchmarks, agent runs averaged ~777s (and up to 1,238s). An audit of the agent execution pipeline revealed the exact root causes:
-1. **Model Selection & Quota Exhaustion**: The default model was set to `gemini-3.6-flash`, which repeatedly encountered `429 RESOURCE_EXHAUSTED` (free-tier quota of 20 requests/day) and `503 UNAVAILABLE` high-demand spikes.
-2. **SDK Timeout Misconfiguration**: `google-genai` expects a top-level `timeout` parameter in `types.HttpOptions(timeout=15000)` (milliseconds). The codebase previously passed `client_args={"timeout": 30.0}`, which was silently ignored by the SDK, leaving the default timeout at `None` (600 seconds / 10 minutes).
-3. **Compounding Retries**: Internal SDK retries combined with outer backoff loops stalled each step for ~175–183 seconds across 4–7 steps.
+The harness systematically benchmarks both modes over identical lab targets with equal tool permissions, authenticated credential handles (`user_a`, `user_b`), and step budgets using the live Gemini API (`gemini-3.5-flash-lite`):
 
-**The Fix**:
-- Migrated default model to `gemini-flash-lite-latest` (with graceful fallback to `gemini-3.1-flash-lite`), which delivers sub-second inference latency (~0.98s per tool-call decision).
-- Configured explicit `HttpOptions(timeout=15000)` (15 seconds) so stale connections fail fast rather than hanging for 10 minutes.
-- Immediate model fallback upon encountering any 429 or 503 response.
-- Result: Agent run wall-clock time dropped from **777.66s to 42.93s** across all 5 benchmark runs.
+#### 1. OWASP Juice Shop (`http://localhost:3000`)
+*Artifact Source:* [`eval/results/mode_comparison_juiceshop.json`](eval/results/mode_comparison_juiceshop.json)
 
-#### Why the Agent Adds Nothing Over the Deterministic Baseline
-The agent discovered 0 novel findings compared to the deterministic pipeline. Why?
-- **Tool Sandbox Equivalence**: Both modes share the exact same diagnostic tool sandbox (`nmap_scan`, `ffuf_scan`, `http_probe`, `access_control_check`, `reflected_input_check`) and the same server-side allowlist.
-- **Systematic vs. Discretionary Coverage**: The deterministic pipeline executes checks systematically on every discovered endpoint. The agent LLM does not generate novel exploit payloads or discover secret unlisted endpoints out of thin air; it merely decides *which* tool to invoke next on known nodes.
-- **Cost / Latency Trade-Off**: While the agent saves 1 step via early completion (`no_further_action` at step 9 vs step 10), it incurs a 51% latency overhead (42.93s vs 28.40s) and consumes ~26,380 tokens per run ($0.0021) without improving detection recall. For structured, bounded diagnostic scans, the deterministic pipeline is objectively superior in speed, cost, and reproducibility.
+| Budget | Mode | Steps ($\mu \pm \sigma$) | Nodes ($\mu \pm \sigma$) | Valid Findings ($\mu \pm \sigma$) | False Positives | Steps to 1st Valid | Sec to 1st Valid | Wall-Clock Time (s) | Tokens Used ($\mu \pm \sigma$) |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **3** | **Deterministic** | $3.0 \pm 0.0$ | $8.0 \pm 0.0$ | $0.0 \pm 0.0$ | $0.0 \pm 0.0$ | N/A | N/A | **12.77 s** $\pm$ 0.15 s | **0** ($0.00) |
+| | **Agent (LLM)** | $3.0 \pm 0.0$ | $8.0 \pm 0.0$ | $0.0 \pm 0.0$ | $0.0 \pm 0.0$ | N/A | N/A | 19.75 s $\pm$ 0.59 s | 6,993 $\pm$ 55 ($0.0006) |
+| **5** | **Deterministic** | $5.0 \pm 0.0$ | $8.0 \pm 0.0$ | $0.0 \pm 0.0$ | $0.0 \pm 0.0$ | N/A | N/A | **13.63 s** $\pm$ 0.96 s | **0** ($0.00) |
+| | **Agent (LLM)** | $5.0 \pm 0.0$ | $8.2 \pm 0.4$ | $0.2 \pm 0.4$ | $0.0 \pm 0.0$ | $5.0 \pm 0.0$ | 25.69 s $\pm$ 0.0 s | 23.95 s $\pm$ 1.03 s | 15,025 $\pm$ 71 ($0.0012) |
+| **8** | **Deterministic** | $8.0 \pm 0.0$ | $9.0 \pm 0.0$ | $1.0 \pm 0.0$ | $0.0 \pm 0.0$ | $4.0 \pm 0.0$ | **13.71 s** $\pm$ 0.10 s | **14.01 s** $\pm$ 0.09 s | **0** ($0.00) |
+| | **Agent (LLM)** | $8.0 \pm 0.0$ | $9.6 \pm 0.5$ | $1.6 \pm 0.5$ | $0.0 \pm 0.0$ | $5.4 \pm 0.55$ | 24.30 s $\pm$ 1.19 s | 30.29 s $\pm$ 0.99 s | 27,457 $\pm$ 554 ($0.0022) |
+
+#### 2. OWASP crAPI (`http://localhost:8888` - Known BOLA Ground Truth)
+*Artifact Source:* [`eval/results/mode_comparison_crapi.json`](eval/results/mode_comparison_crapi.json)
+
+| Budget | Mode | Steps ($\mu \pm \sigma$) | Nodes ($\mu \pm \sigma$) | Valid Findings ($\mu \pm \sigma$) | False Positives | Steps to 1st Valid | Sec to 1st Valid | Wall-Clock Time (s) | Tokens Used ($\mu \pm \sigma$) | Excluded (API Errors) |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **3** | **Deterministic** | $3.0 \pm 0.0$ | $5.8 \pm 0.4$ | $0.0 \pm 0.0$ | $0.0 \pm 0.0$ | N/A | N/A | **8.09 s** $\pm$ 0.62 s | **0** ($0.00) | 0 |
+| | **Agent (LLM)** | $3.0 \pm 0.0$ | $6.0 \pm 0.0$ | $0.0 \pm 0.0$ | $0.0 \pm 0.0$ | N/A | N/A | 33.70 s $\pm$ 5.17 s | 6,231 $\pm$ 83 ($0.0005) | 0 |
+| **5** | **Deterministic** | $5.0 \pm 0.0$ | $6.0 \pm 0.0$ | $0.0 \pm 0.0$ | $0.0 \pm 0.0$ | N/A | N/A | **8.19 s** $\pm$ 0.38 s | **0** ($0.00) | 0 |
+| | **Agent (LLM)** | $5.0 \pm 0.0$ | $6.2 \pm 0.4$ | $0.2 \pm 0.4$ | $0.0 \pm 0.0$ | $5.0 \pm 0.0$ | 18.33 s $\pm$ 0.0 s | 20.69 s $\pm$ 1.98 s | 12,663 $\pm$ 49 ($0.0010) | 0 |
+| **8** | **Deterministic** | $8.0 \pm 0.0$ | $6.6 \pm 0.5$ | $0.6 \pm 0.5$ | $0.0 \pm 0.0$ | **$8.0 \pm 0.0$** | **8.77 s** $\pm$ 0.10 s | **8.74 s** $\pm$ 0.08 s | **0** ($0.00) | 0 |
+| | **Agent (LLM)** | $8.0 \pm 0.0$ | $7.0 \pm 0.0$ | **1.0** $\pm$ 0.0 | $0.0 \pm 0.0$ | $7.4 \pm 0.8$ | 56.51 s $\pm$ 4.78 s | 60.29 s $\pm$ 5.72 s | 22,617 $\pm$ 407 ($0.0018) | 0 |
+
+> [!NOTE]
+> **Deterministic vs. Agent Architectural Trade-off**:
+> - **Deterministic Pipeline Mechanics & Budget 5 vs. 8 Ordering**: The deterministic pipeline executes 2 steps per endpoint (`http_probe` then `access_control_check`). Discovered endpoints are ordered by discovery arrival: `robots.txt` (steps 3–4), `index.html` (steps 5–6), and vehicle API endpoints (steps 7–8). At Budget 5, execution terminates at step 5 after probing `index.html`, never reaching the vehicle endpoints (scoring 0 findings). At Budget 8, the BOLA is tested and verified at **Step 8** (scoring 1 finding in runs where `location` is reached).
+> - **Deterministic Variance ($0.6 \pm 0.5$) Empirical Root Cause**: Discovered endpoints originate from `ffuf` running 40 concurrent fuzzing threads against crAPI. Network response arrival order between `/vehicle/vehicles` (common.txt line 22) and `/vehicle/{vehicle_id}/location` (line 23) fluctuates under concurrency. When `location` arrives first (3/5 runs), it is tested at steps 7–8 (1 finding); when `vehicles` arrives first (2/5 runs), it is tested at steps 7–8 and the 8-step budget is exhausted before reaching `location` (0 findings).
+> - **Agent (LLM) Adaptive Prioritization**: The agent reasons over discovered attack surfaces, prioritizing vehicle API endpoints directly from the graph state, achieving $1.0 \pm 0.0$ recall on crAPI Budget 8 and uncovering multiple finding categories ($1.6 \pm 0.5$) on Juice Shop Budget 8, at the cost of live API latency (~20s–60s) and token consumption.
+> - **API Error Handling**: Runs encountering live Gemini API errors (503 Service Unavailable, timeouts, quota) are flagged as `INVALID`, excluded from statistical aggregation, and audited in the `Excluded` column.
+
+---
+
+### Evaluation Limitations & Methodological Constraints
+
+1. **Sample Size ($N=5$ Runs per Budget)**: Step-budget comparison benchmarks evaluate $N=5$ iterations per budget level (30 runs per lab, 60 total benchmark runs) to balance statistical observation against live Gemini API rate limits and local lab execution overhead.
+2. **Sparse Ground Truth per Target**: Local authorized benchmark labs provide a focused set of ground-truth findings (1 confirmed BOLA in crAPI, 3 vulnerabilities in Juice Shop). Consequently, each finding detection creates discrete score increments ($0.0 \to 0.2 \to 1.0$).
+3. **Wide Confidence Intervals**: With finite case counts in live dynamic lab environments, 95% Wilson score confidence intervals for recall and precision remain moderately wide (e.g. 100% precision with [51.0%, 100.0%] Wilson bounds).
+4. **Deterministic Remediation Templates**: Triage notes (`reports/triage.py`) are strictly generated from deterministic remediation templates rather than unconstrained LLM free-text generation; all entity claims (endpoints, status codes, user handles, CWEs) are programmatically verified against stored database evidence traces.
 
 ---
 
@@ -274,7 +294,7 @@ make lab-down
    ```bash
    uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
    ```
-   > All endpoints except `/health` require the `X-API-Key` header (or `?api_key=` query parameter).
+   > All endpoints except `/health` require the `X-API-Key` HTTP header. URL query parameter authentication (`?api_key=...`) is strictly rejected with HTTP 401 to prevent credential leakage in server logs and browser histories.
    > Both Uvicorn (`--host 127.0.0.1`) and PostgreSQL (`127.0.0.1:5432`) are strictly bound to loopback interfaces.
 
 ### Frontend Dashboard
@@ -495,6 +515,34 @@ For full threat descriptions, mitigations, and automated test specifications, se
 
 ---
 
-## 8. License
+## 8. Claims Traceability Matrix
 
-This project is licensed under the Apache 2.0 License.
+Every quantitative performance metric, security guardrail, and architectural capability reported in this README maps directly to verified repository code, passing automated tests, and machine-readable JSON artifacts:
+
+| README Claim / Metric | Metric Value | Source Implementation | Test Suite / Runner | Backing Artifact |
+| :--- | :---: | :--- | :--- | :--- |
+| **Live BOLA Detection (In-Scope)** | **100.0%** [51.0%–100.0%] | [`tools/access_control_check.py`](tools/access_control_check.py) | [`eval/run.py`](eval/run.py), [`test_verification.py`](tests/test_verification.py) | [`eval/results/latest.json`](eval/results/latest.json) |
+| **Reflection Check (In-Scope)** | **100.0%** [34.2%–100.0%] | [`tools/reflected_input_check.py`](tools/reflected_input_check.py) | [`eval/run.py`](eval/run.py), [`test_reflected_input_check.py`](tests/test_reflected_input_check.py) | [`eval/results/latest.json`](eval/results/latest.json) |
+| **Structural Secrets (In-Scope)** | **100.0%** [51.0%–100.0%] | [`tools/secret_detection.py`](tools/secret_detection.py) | [`eval/run.py`](eval/run.py), [`test_secret_detection.py`](tests/test_secret_detection.py) | [`eval/results/latest.json`](eval/results/latest.json) |
+| **Overall Recall (w/ Blindspots)** | **69.6%** [49.1%–84.4%] | [`eval/run.py`](eval/run.py) (Dual Recall) | [`test_eval_harness.py`](tests/test_eval_harness.py) | [`eval/results/latest.json`](eval/results/latest.json) |
+| **Step-Budget Mode Benchmark** | Det ~7.9–14.0s ($0.00) vs Agent ~20–60s | [`eval/compare_modes.py`](eval/compare_modes.py) | [`test_mode_comparison_and_triage.py`](tests/test_mode_comparison_and_triage.py) | [`eval/results/mode_comparison.json`](eval/results/mode_comparison.json) |
+| **Prompt Injection Defense** | Max 256 chars & data framing | [`agent/state_summary.py`](agent/state_summary.py) | [`test_guardrails_hostile_content.py`](tests/test_guardrails_hostile_content.py) | [`docs/threat_model.md`](docs/threat_model.md) |
+| **SSRF & Scope Escape Defense** | Server allowlist + normalization | [`api/allowlist.py`](api/allowlist.py) | [`test_scans.py`](tests/test_scans.py), [`test_http_probe.py`](tests/test_http_probe.py) | [`config/allowlist.yaml`](config/allowlist.yaml) |
+| **Strict Header Authentication** | HTTP 401 on `?api_key=...` | [`api/auth.py`](api/auth.py) | [`test_security_hardening.py`](tests/test_security_hardening.py) | Header enforcement |
+| **SARIF & PDF Export Redaction** | Masked tokens & credentials | [`reports/export.py`](reports/export.py) | [`test_report_export.py`](tests/test_report_export.py) | Redaction filters |
+| **Evidence-Grounded Triage Notes** | Verified endpoints, codes, CWEs | [`reports/triage.py`](reports/triage.py) | [`test_mode_comparison_and_triage.py`](tests/test_mode_comparison_and_triage.py) | Grounded templated notes |
+
+---
+
+## 9. Technical Documentation & Portfolio Resources
+
+For detailed interview walkthroughs, architectural trade-offs, and resume talking points:
+- 📖 **[AppSec & AI Engineering Interview Defense Guide](docs/INTERVIEW.md)**: Deep answers to tough interview questions on threat modeling, prompt injection, dual recall, and agent vs. deterministic trade-offs.
+- 💼 **[Resume Bullets & Portfolio Talking Points](docs/RESUME_BULLETS.md)**: Metric-backed, quantified bullet points tailored for AppSec Engineer, Security Software Engineer, and AI Security roles.
+- 🛡️ **[Threat Model & Guardrails Architecture](docs/threat_model.md)**: Complete threat model specifying system trust boundaries, attack vectors, and automated guardrail mitigations.
+
+---
+
+## 10. License
+
+This project is licensed under the Apache 2.0 License. See the [LICENSE](LICENSE) file for details.

@@ -1,0 +1,21 @@
+title = "AttackGraph AI Audit Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for unit test fixtures and eval cases"
+paths = [
+    '''tests/test_secret_detection\.py''',
+    '''eval/cases\.yaml'''
+]
+
+[[rules]]
+id = "crapi-vehicle-uuid"
+description = "crAPI vulnerable vehicle seed UUID in API paths"
+regex = '''(?i)(?:vehicle(?:_id)?|identity/api/v2/vehicle)/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'''
+
+[[rules]]
+id = "lab-emails"
+description = "Lab test email addresses (crAPI / Juice Shop / example.com)"
+regex = '''(?i)[a-zA-Z0-9_.+-]+@(juice-sh\.op|crapi\.apisec\.ai|example\.com)'''

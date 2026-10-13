@@ -13,9 +13,12 @@ decision loop strictly relies on standard structured function-calling / tool-use
 
 import json
 import os
+import socket
 import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime
+from contextlib import contextmanager
+
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -35,8 +38,35 @@ load_dotenv()
 
 # Recommended fast flash-lite model providing sub-second latency, native tool calling,
 # and high free-tier rate limits.
-DEFAULT_MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest")
-FALLBACK_MODELS = ["gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-2.5-flash"]
+DEFAULT_MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+FALLBACK_MODELS = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-flash-latest"]
+
+
+@contextmanager
+def _scoped_ipv4_resolution():
+    """
+    Opt-in IPv4 resolution workaround scoped exclusively to Gemini API calls.
+    Enabled only if ATTACKGRAPH_GEMINI_IPV4 is set to '1' or 'true'.
+    Guarantees no global socket monkeypatching touches other components (FastAPI, httpx, DB).
+    """
+    force_ipv4 = os.getenv("ATTACKGRAPH_GEMINI_IPV4", "0").lower() in ("1", "true", "yes")
+    if not force_ipv4:
+        yield
+        return
+
+    orig_gai = socket.getaddrinfo
+
+    def _ipv4_gai(host, port, family=0, type=0, proto=0, flags=0):
+        try:
+            return orig_gai(host, port, socket.AF_INET, type, proto, flags)
+        except Exception:
+            return orig_gai(host, port, family, type, proto, flags)
+
+    socket.getaddrinfo = _ipv4_gai
+    try:
+        yield
+    finally:
+        socket.getaddrinfo = orig_gai
 
 
 def _generate_content_with_retry(
@@ -54,24 +84,25 @@ def _generate_content_with_retry(
     models_to_try = [model_name] + [m for m in FALLBACK_MODELS if m != model_name]
     last_exception = None
 
-    for m in models_to_try:
-        delay = initial_delay
-        for attempt in range(1, max_retries + 1):
-            try:
-                return client.models.generate_content(
-                    model=m,
-                    contents=prompt,
-                    config=config,
-                )
-            except Exception as e:
-                last_exception = e
-                err_str = str(e).lower()
-                # On 429 quota exhaustion or 503 service unavailable, jump to next fallback model immediately
-                if "429" in err_str or "quota" in err_str or "503" in err_str:
-                    break
-                if attempt < max_retries:
-                    time.sleep(delay)
-                    delay *= 2.0
+    with _scoped_ipv4_resolution():
+        for m in models_to_try:
+            delay = initial_delay
+            for attempt in range(1, max_retries + 1):
+                try:
+                    return client.models.generate_content(
+                        model=m,
+                        contents=prompt,
+                        config=config,
+                    )
+                except Exception as e:
+                    last_exception = e
+                    err_str = str(e).lower()
+                    # On 429 quota exhaustion or 503 service unavailable, jump to next fallback model immediately
+                    if "429" in err_str or "quota" in err_str or "503" in err_str:
+                        break
+                    if attempt < max_retries:
+                        time.sleep(delay)
+                        delay *= 2.0
     raise last_exception
 
 
@@ -192,6 +223,7 @@ def execute_agent_step(
         ]
     )
 
+    t_api_start = time.time()
     try:
         response = _generate_content_with_retry(
             client=client,
@@ -202,9 +234,10 @@ def execute_agent_step(
             initial_delay=1.0
         )
     except Exception as e:
+        api_latency = round(time.time() - t_api_start, 3)
         error_msg = f"Gemini API call failed after retries/timeout: {str(e)}"
         action_str = "api_error"
-        observation_str = f"ERROR: {error_msg}"
+        observation_str = f"ERROR: {error_msg} [latency={api_latency}s]"
         log_entry = AgentLog(
             scan_id=scan_id,
             step_number=step_number,
@@ -222,7 +255,18 @@ def execute_agent_step(
             "tool": None,
             "result": None,
             "stop": True,
+            "latency": api_latency,
+            "response_id": None,
+            "model_name": model_name,
+            "tokens": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+            "refusal": False,
+            "guardrail_rejection": False,
+            "api_error": True,
         }
+
+    api_latency = round(time.time() - t_api_start, 3)
+    response_id = getattr(response, "response_id", None) or getattr(response, "id", None) or "unknown"
+    actual_model = getattr(response, "model_version", None) or model_name
 
     prompt_tokens = 0
     candidates_tokens = 0
@@ -252,9 +296,11 @@ def execute_agent_step(
     if response.function_calls:
         function_call = response.function_calls[0]
 
+    meta_str = f"[model={actual_model}, resp_id={response_id}, latency={api_latency}s]"
+
     if not function_call:
         action_str = "no_tool_call"
-        observation_str = "LLM did not propose a function call."
+        observation_str = f"LLM did not propose a function call. {meta_str}"
         log_entry = AgentLog(
             scan_id=scan_id,
             step_number=step_number,
@@ -430,7 +476,7 @@ def execute_agent_step(
         else:
             raise ValueError(f"Unknown tool name '{tool_name}' proposed by LLM.")
 
-        observation_str = f"SUCCESS: Executed {tool_name}."
+        observation_str = f"SUCCESS: Executed {tool_name}. {meta_str}"
         log_entry = AgentLog(
             scan_id=scan_id,
             step_number=step_number,
@@ -448,6 +494,9 @@ def execute_agent_step(
             "tool": tool_name,
             "node_id": target_node_id,
             "result_summary": observation_str,
+            "latency": api_latency,
+            "response_id": response_id,
+            "model_name": actual_model,
             "stop": False,
             "tokens": step_tokens,
             "refusal": refusal,
@@ -455,7 +504,7 @@ def execute_agent_step(
         }
     except Exception as e:
         error_msg = str(e)
-        observation_str = f"ERROR: Tool execution failed: {error_msg}"
+        observation_str = f"ERROR: Tool execution failed: {error_msg} {meta_str}"
 
         # Record Evidence row so future steps treat this (tool_name, node_id) pair as attempted
         failed_evidence = Evidence(
@@ -527,6 +576,7 @@ def run_agent_loop(scan_id: str, db: Session, max_steps: int = 15, model_name: s
 
     from agent.deterministic import _evaluate_findings_accuracy
     accuracy = _evaluate_findings_accuracy(scan_id, db)
+    has_api_error = any(s.get("api_error", False) for s in steps_taken)
 
     metrics = {
         "mode": "agent",
@@ -541,7 +591,9 @@ def run_agent_loop(scan_id: str, db: Session, max_steps: int = 15, model_name: s
         },
         "estimated_cost": estimated_cost,
         "refusals": total_refusals,
-        "guardrail_rejections": total_guardrail_rejections
+        "guardrail_rejections": total_guardrail_rejections,
+        "api_error": has_api_error,
+        "is_valid_run": not has_api_error
     }
 
     final_state = summarize_scan_state(scan_id, db)
