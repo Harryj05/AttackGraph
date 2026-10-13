@@ -297,6 +297,36 @@ make lab-down
    > All endpoints except `/health` require the `X-API-Key` HTTP header. URL query parameter authentication (`?api_key=...`) is strictly rejected with HTTP 401 to prevent credential leakage in server logs and browser histories.
    > Both Uvicorn (`--host 127.0.0.1`) and PostgreSQL (`127.0.0.1:5432`) are strictly bound to loopback interfaces.
 
+### Run Without Docker (SQLite) — fastest for a laptop or demo
+
+If Docker (and therefore Postgres) is unavailable, the app runs on a local **SQLite** file instead. The ORM models use only portable column types (`String`, `JSON`, `DateTime`, …), so no schema or code changes are required.
+
+1. Create a virtual environment and install dependencies (same as above):
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate   # Windows: .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+2. Create a `.env` (copy from `.env.example`) and point `DATABASE_URL` at a local SQLite file:
+   ```env
+   ATTACKGRAPH_API_KEY=attackgraph-insecure-dev-key
+   CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+   DATABASE_URL=sqlite:///./attackgraph.db
+   ```
+3. Create the tables directly from the models (SQLite does not need Alembic migrations here):
+   ```bash
+   DATABASE_URL="sqlite:///./attackgraph.db" python -c "from db.database import Base, engine; import db.models; Base.metadata.create_all(engine)"
+   ```
+   > PowerShell: `$env:DATABASE_URL="sqlite:///./attackgraph.db"; python -c "from db.database import Base, engine; import db.models; Base.metadata.create_all(engine)"`
+4. Start the API, loading `.env` so `DATABASE_URL` is picked up:
+   ```bash
+   uvicorn api.main:app --host 127.0.0.1 --port 8000 --env-file .env --reload
+   ```
+5. Start the frontend in a second terminal (see below), then open `http://localhost:5173`. The frontend uses the dev API key `attackgraph-insecure-dev-key` by default.
+
+> **What works on SQLite without Docker:** the dashboard, graph canvas, findings, replay, calibration, SARIF/PDF export, and the full `pytest` suite (live-lab tests auto-skip).
+> **What still needs more:** live scanning (the **Run Agent** / pipeline) requires a reachable authorized lab target (Juice Shop / crAPI / DVWA), and **Agent mode** additionally requires a `GEMINI_API_KEY`. With no live target, use a pre-populated scan to explore the UI.
+
 ### Frontend Dashboard
 1. Navigate to the frontend directory:
    ```bash
