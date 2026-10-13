@@ -224,8 +224,17 @@ def test_reflected_input_check_cross_scan_scoping():
     assert scan_b_resp.status_code == 201
     scan_b_id = scan_b_resp.json()["id"]
 
-    ffuf_nodes = client.post(f"/scans/{scan_b_id}/ffuf").json()["nodes"]
-    node_b_id = ffuf_nodes[0]["id"]
+    db = TestingSessionLocal()
+    node_b = Node(
+        scan_id=scan_b_id,
+        label="Endpoint /search?q=test",
+        node_type="endpoint",
+        properties={"url": "http://localhost:8080/search?q=test"}
+    )
+    db.add(node_b)
+    db.commit()
+    node_b_id = node_b.id
+    db.close()
 
     response = client.post(f"/scans/{scan_a_id}/nodes/{node_b_id}/reflected-input-check")
     assert response.status_code == 403

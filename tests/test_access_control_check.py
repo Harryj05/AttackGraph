@@ -124,8 +124,17 @@ def test_access_control_check_cross_scan_scoping():
     scan_a_id = client.post("/scans", json={"target_url": "http://localhost:3000"}).json()["id"]
     scan_b_id = client.post("/scans", json={"target_url": "http://localhost:8080"}).json()["id"]
 
-    ffuf_nodes = client.post(f"/scans/{scan_b_id}/ffuf").json()["nodes"]
-    node_b_id = ffuf_nodes[0]["id"]
+    db = TestingSessionLocal()
+    node_b = Node(
+        scan_id=scan_b_id,
+        label="Endpoint /api/users/1",
+        node_type="endpoint",
+        properties={"url": "http://localhost:8080/api/users/1"}
+    )
+    db.add(node_b)
+    db.commit()
+    node_b_id = node_b.id
+    db.close()
 
     response = client.post(f"/scans/{scan_a_id}/nodes/{node_b_id}/access-control-check")
     assert response.status_code == 403

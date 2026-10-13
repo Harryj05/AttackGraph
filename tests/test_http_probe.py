@@ -106,12 +106,21 @@ def test_http_probe_cross_scan_rejection():
     scan_a = client.post("/scans", json={"target_url": "http://localhost:3000"}).json()["id"]
     scan_b = client.post("/scans", json={"target_url": "http://localhost:8080"}).json()["id"]
 
-    # Run ffuf on Scan B to generate nodes belonging to Scan B
-    ffuf_b_nodes = client.post(f"/scans/{scan_b}/ffuf").json()["nodes"]
-    node_from_scan_b = ffuf_b_nodes[0]
+    from db.models import Node
+    db = TestingSessionLocal()
+    node_from_scan_b = Node(
+        scan_id=scan_b,
+        label="Endpoint /api",
+        node_type="endpoint",
+        properties={"url": "http://localhost:8080/api"}
+    )
+    db.add(node_from_scan_b)
+    db.commit()
+    node_b_id = node_from_scan_b.id
+    db.close()
 
     # 2. Attempt to probe Scan B's node using Scan A's ID
-    probe_resp = client.post(f"/scans/{scan_a}/nodes/{node_from_scan_b['id']}/probe")
+    probe_resp = client.post(f"/scans/{scan_a}/nodes/{node_b_id}/probe")
     
     # Must return HTTP 403 Forbidden with Security Violation
     assert probe_resp.status_code == 403

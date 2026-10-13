@@ -124,6 +124,14 @@ def test_nmap_scan_missing_binary_fails_loudly(monkeypatch):
 
 
 def test_nmap_creates_edge_from_root_host_to_port_nodes():
+    import httpx, shutil
+    if not shutil.which("nmap"):
+        pytest.skip("Nmap binary not installed")
+    try:
+        httpx.get("http://localhost:3000", timeout=1.0)
+    except Exception:
+        pytest.skip("Juice Shop container is offline")
+
     # 1. Create a scan for Juice Shop (http://localhost:3000)
     scan_resp = client.post("/scans", json={"target_url": "http://localhost:3000"})
     assert scan_resp.status_code == 201
