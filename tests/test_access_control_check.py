@@ -41,6 +41,11 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
+@pytest.fixture(autouse=True)
+def reset_database():
+    app.dependency_overrides[get_db] = override_get_db
+    yield
+
 
 def test_compare_responses_differing_data():
     req = httpx.Request("GET", "http://localhost:3000/api/users?id=1")

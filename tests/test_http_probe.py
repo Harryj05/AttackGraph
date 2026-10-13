@@ -36,6 +36,11 @@ app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
+@pytest.fixture(autouse=True)
+def reset_database():
+    app.dependency_overrides[get_db] = override_get_db
+    yield
+
 def test_http_probe_real_container_juiceshop():
     import httpx
     try:

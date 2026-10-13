@@ -42,6 +42,11 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
+@pytest.fixture(autouse=True)
+def reset_database():
+    app.dependency_overrides[get_db] = override_get_db
+    yield
+
 
 def test_classify_reflection_plain_text():
     marker = "AGTEST1234567890AB"
