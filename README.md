@@ -327,6 +327,26 @@ If Docker (and therefore Postgres) is unavailable, the app runs on a local **SQL
 > **What works on SQLite without Docker:** the dashboard, graph canvas, findings, replay, calibration, SARIF/PDF export, and the full `pytest` suite (live-lab tests auto-skip).
 > **What still needs more:** live scanning (the **Run Agent** / pipeline) requires a reachable authorized lab target (Juice Shop / crAPI / DVWA), and **Agent mode** additionally requires a `GEMINI_API_KEY`. With no live target, use a pre-populated scan to explore the UI.
 
+### Populate a demo scan (optional)
+
+To explore the UI without running a live scan, seed a synthetic demo scan (asset graph + findings) and, optionally, illustrative calibration data:
+
+```bash
+DATABASE_URL="sqlite:///./attackgraph.db" python scripts/seed_demo.py
+DATABASE_URL="sqlite:///./attackgraph.db" python scripts/seed_calibration.py   # fills the Calibration screen
+```
+
+`seed_demo.py` is flagged synthetic (provenance reported as "constructed", never "live"); `seed_calibration.py` adds ~32 illustrative reviewed edges so ECE / Brier / the reliability diagram render. Both respect `DATABASE_URL`, so they also work against Postgres.
+
+### Live scanning tools (nmap and ffuf)
+
+Live scans (the deterministic pipeline and Agent mode) shell out to real external tools:
+
+- **ffuf** (endpoint discovery): download the release binary from the [ffuf releases](https://github.com/ffuf/ffuf/releases) and place it on `PATH` or at `C:\ffuf\ffuf.exe` on Windows — the wrapper also checks that fallback path. On Linux/macOS use your package manager or `go install github.com/ffuf/ffuf/v2@latest`.
+- **nmap** (port/service discovery): install from [nmap.org](https://nmap.org/download.html) (Windows needs the Npcap driver and admin rights) or a package manager (`apt install nmap`, `brew install nmap`).
+
+Without these, a live scan still completes but discovers nothing (each tool is rejected with "binary not found"); use a seeded demo scan instead. Agent mode additionally needs a valid `GEMINI_API_KEY`.
+
 ### Frontend Dashboard
 1. Navigate to the frontend directory:
    ```bash
