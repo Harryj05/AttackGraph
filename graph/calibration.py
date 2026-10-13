@@ -132,11 +132,14 @@ def compute_calibration(db: Session, scan_ids: Optional[List[str]] = None, inclu
         brier_score = None
         ece = None
 
-    # Mandatory sample size warning per Section 35/36 documentation
-    warning_text = (
-        f"Sample size is small (N={total_evaluated}, under 30). "
-        "Results should be read as illustrative given limited scan volume per project documentation."
-    )
+    # Sample size warning per Section 35/36 documentation — only when N < 30.
+    if total_evaluated < 30:
+        warning_text = (
+            f"Sample size is small (N={total_evaluated}, under 30). "
+            "Results should be read as illustrative given limited scan volume per project documentation."
+        )
+    else:
+        warning_text = ""
 
     return {
         "total_edges_with_outcome": total_evaluated,

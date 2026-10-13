@@ -72,18 +72,20 @@ export const CalibrationView: React.FC<CalibrationViewProps> = ({ scans }) => {
         </div>
       </div>
 
-      {/* 2. ALWAYS-Visible Sample Size Warning Banner */}
-      <div className="bg-amber-500/15 border-2 border-amber-500/40 rounded-2xl p-4 flex items-start gap-3 shadow-xl">
-        <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-        <div className="flex-1 space-y-1">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">
-            STATISTICAL SAMPLE SIZE WARNING
-          </h4>
-          <p className="text-xs font-mono text-[#18202c] leading-relaxed">
-            {report?.sample_size_warning || "WARNING: Evaluated sample size N < 30 edges. Calibration statistics (ECE, Brier, reliability diagram) are preliminary observations."}
-          </p>
+      {/* 2. Sample Size Warning Banner — shown only when N < 30 (non-empty message) */}
+      {report?.sample_size_warning ? (
+        <div className="bg-amber-500/15 border-2 border-amber-500/40 rounded-2xl p-4 flex items-start gap-3 shadow-xl">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1 space-y-1">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">
+              STATISTICAL SAMPLE SIZE WARNING
+            </h4>
+            <p className="text-xs font-mono text-[#18202c] leading-relaxed">
+              {report.sample_size_warning}
+            </p>
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {loading ? (
         <div className="flex-1 flex flex-col items-center justify-center py-20 text-xs font-mono text-amber-400 gap-3">
