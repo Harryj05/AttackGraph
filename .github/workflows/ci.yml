@@ -34,11 +34,13 @@ jobs:
         run: |
           pip-audit -r requirements.txt
 
+      - name: Install Gitleaks
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | sudo tar -xz -C /usr/local/bin gitleaks
+
       - name: Secret Scan (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
+        run: |
+          gitleaks detect --source=. --config=gitleaks.toml --gitleaks-ignore-path=.gitleaksignore --verbose --redact
 
   lint:
     name: Lint & Code Style
@@ -118,6 +120,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Install security scan binaries (nmap, ffuf)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nmap
+          curl -sSL https://github.com/ffuf/ffuf/releases/download/v2.1.0/ffuf_2.1.0_linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin ffuf
 
       - name: Run database migrations (Alembic)
         env:
