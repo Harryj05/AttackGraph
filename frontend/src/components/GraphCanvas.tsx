@@ -370,32 +370,33 @@ const InnerGraphCanvas: React.FC<GraphCanvasProps> = ({
 
   if (!graphData || graphData.nodes.length === 0) {
     return (
-      <div className="flex-1 bg-[#0B0D1A] flex flex-col items-center justify-center text-slate-400 gap-3">
-        <Focus className="w-10 h-10 text-indigo-400/50 stroke-[1.5]" />
-        <span className="text-sm font-mono">No nodes yet. Run the agent.</span>
+      <div className="flex-1 bg-[#eef1f5] flex flex-col items-center justify-center text-[#4a5566] gap-3 px-6 text-center">
+        <Focus className="w-10 h-10 text-[#0b7a83]/60 stroke-[1.5]" />
+        <span className="text-base font-semibold text-[#18202c]">No attack graph yet</span>
+        <span className="text-sm max-w-[380px]">Run a scan to map this target's services and endpoints — verified findings appear here as the agent works.</span>
       </div>
     );
   }
 
   return (
-    <div ref={canvasContainerRef} className="flex-1 h-full bg-[#0B0D1A] flex flex-col relative select-none">
+    <div ref={canvasContainerRef} className="flex-1 h-full bg-[#eef1f5] flex flex-col relative select-none">
       {/* 1. Graph Panel Header / Toolbar */}
-      <div className="h-12 bg-[#12152A] border-b border-[#ffffff14] px-4 flex items-center justify-between gap-3 z-10 shrink-0 min-w-0">
+      <div className="h-12 bg-[#f8f9fb] border-b border-[#18202c1f] px-4 flex items-center justify-between gap-3 z-10 shrink-0 min-w-0">
         <div className="flex items-center gap-3 shrink-0 min-w-0">
           {onToggleActivityLog && (
             <button
               onClick={onToggleActivityLog}
               className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
                 isActivityLogOpen
-                  ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30'
-                  : 'bg-[#0B0D1A] text-slate-400 border-[#ffffff14] hover:text-slate-200'
+                  ? 'bg-[#0b7a83]/20 text-[#0b7a83] border-[#0b7a83]/30'
+                  : 'bg-[#eef1f5] text-[#4a5566] border-[#18202c1f] hover:text-[#18202c]'
               }`}
               title={isActivityLogOpen ? "Close Activity Log" : "Open Activity Log"}
             >
               {isActivityLogOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
             </button>
           )}
-          <h2 className="text-sm font-bold text-slate-100 shrink-0 whitespace-nowrap">
+          <h2 className="text-sm font-bold text-[#18202c] shrink-0 whitespace-nowrap">
             Attack Graph
           </h2>
         </div>
@@ -403,23 +404,23 @@ const InnerGraphCanvas: React.FC<GraphCanvasProps> = ({
         <div className="flex items-center gap-2 overflow-x-auto text-nowrap">
           {/* Search Box */}
           <div className="relative flex items-center">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-[#4a5566] absolute left-2.5 pointer-events-none" />
             <input
               type="text"
               placeholder="Search nodes, edges..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-[#0B0D1A] border border-[#ffffff14] text-xs text-slate-200 placeholder-slate-500 rounded-xl pl-8 pr-3 py-1.5 w-40 focus:outline-none focus:border-[#6366F1]"
+              className="bg-[#eef1f5] border border-[#18202c1f] text-xs text-[#18202c] placeholder-[#7a8596] rounded-xl pl-8 pr-3 py-1.5 w-40 focus:outline-none focus:border-[#0b7a83]"
             />
           </div>
 
           {/* Node-Type Filter Dropdown */}
           <div className="relative flex items-center">
-            <Filter className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" />
+            <Filter className="w-3.5 h-3.5 text-[#4a5566] absolute left-2.5 pointer-events-none" />
             <select
               value={nodeTypeFilter}
               onChange={(e) => setNodeTypeFilter(e.target.value)}
-              className="bg-[#0B0D1A] border border-[#ffffff14] text-xs text-slate-200 rounded-xl pl-8 pr-4 py-1.5 focus:outline-none focus:border-[#6366F1] cursor-pointer appearance-none"
+              className="bg-[#eef1f5] border border-[#18202c1f] text-xs text-[#18202c] rounded-xl pl-8 pr-4 py-1.5 focus:outline-none focus:border-[#0b7a83] cursor-pointer appearance-none"
             >
               <option value="ALL">All Types</option>
               <option value="SERVICE">Services</option>
@@ -435,53 +436,53 @@ const InnerGraphCanvas: React.FC<GraphCanvasProps> = ({
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
               showRefuted
                 ? 'bg-pink-500/15 text-pink-400 border-pink-500/40'
-                : 'bg-[#0B0D1A] text-slate-400 border-[#ffffff14] hover:text-slate-200'
+                : 'bg-[#eef1f5] text-[#4a5566] border-[#18202c1f] hover:text-[#18202c]'
             }`}
           >
             {showRefuted ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
             <span>{showRefuted ? 'Refuted Shown' : 'Refuted Hidden'}</span>
             {!showRefuted && hiddenEdgeCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-200 text-[10px] font-mono">
+              <span className="px-1.5 py-0.2 rounded-full bg-[#cfd6df] text-[#18202c] text-[10px] font-mono">
                 +{hiddenEdgeCount}
               </span>
             )}
           </button>
 
           {/* Canvas View Controls */}
-          <div className="flex items-center bg-[#0B0D1A] border border-[#ffffff14] rounded-xl p-0.5">
+          <div className="flex items-center bg-[#eef1f5] border border-[#18202c1f] rounded-xl p-0.5">
             <button
               onClick={() => fitView({ padding: 0.2, maxZoom: 1, duration: 200 })}
-              className="p-1.5 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800/50 transition-colors cursor-pointer"
+              className="p-1.5 text-[#4a5566] hover:text-[#18202c] rounded-lg hover:bg-[#e4e8ee]/50 transition-colors cursor-pointer"
               title="Fit View"
             >
               <Focus className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => zoomIn()}
-              className="p-1.5 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800/50 transition-colors cursor-pointer"
+              className="p-1.5 text-[#4a5566] hover:text-[#18202c] rounded-lg hover:bg-[#e4e8ee]/50 transition-colors cursor-pointer"
               title="Zoom In"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => zoomOut()}
-              className="p-1.5 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800/50 transition-colors cursor-pointer"
+              className="p-1.5 text-[#4a5566] hover:text-[#18202c] rounded-lg hover:bg-[#e4e8ee]/50 transition-colors cursor-pointer"
               title="Zoom Out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={toggleFullscreen}
-              className="p-1.5 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800/50 transition-colors cursor-pointer"
+              className="p-1.5 text-[#4a5566] hover:text-[#18202c] rounded-lg hover:bg-[#e4e8ee]/50 transition-colors cursor-pointer"
               title="Toggle Fullscreen"
             >
               {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
             </button>
             <button
-              className="p-1.5 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800/50 transition-colors cursor-pointer"
+              className="p-1.5 text-[#4a5566] hover:text-[#18202c] rounded-lg hover:bg-[#e4e8ee]/50 transition-colors cursor-pointer"
               title="Controls: Scroll to zoom | Drag to pan | Click node/edge to inspect"
             >
-              <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
+              <HelpCircle className="w-3.5 h-3.5 text-[#0b7a83]" />
             </button>
           </div>
         </div>
@@ -503,7 +504,7 @@ const InnerGraphCanvas: React.FC<GraphCanvasProps> = ({
           maxZoom={1.5}
           proOptions={{ hideAttribution: true }}
         >
-          <Background color="rgba(255,255,255,0.06)" gap={24} size={1} />
+          <Background color="rgba(24,32,44,0.07)" gap={24} size={1} />
           
           {/* Custom Dark Theme Minimap (Smaller 140x90, bottom-right, hidden below 1400px width) */}
           <MiniMap
@@ -514,10 +515,10 @@ const InnerGraphCanvas: React.FC<GraphCanvasProps> = ({
               if (graphNode?.node_type.includes('secret')) return '#EAB308';
               if (graphNode?.node_type.includes('endpoint')) return '#14B8A6';
               if (graphNode?.node_type.includes('service')) return '#3B82F6';
-              return '#6366F1';
+              return '#0b7a83';
             }}
-            maskColor="rgba(11, 13, 26, 0.85)"
-            className="!bg-[#12152A] !border-[#ffffff14] !rounded-xl !shadow-2xl !bottom-3 !right-3 hidden [@media(min-width:1400px)]:block"
+            maskColor="rgba(238, 241, 245, 0.82)"
+            className="!bg-[#f8f9fb] !border-[#18202c1f] !rounded-xl !shadow-2xl !bottom-3 !right-3 hidden [@media(min-width:1400px)]:block"
           />
         </ReactFlow>
 
@@ -525,19 +526,19 @@ const InnerGraphCanvas: React.FC<GraphCanvasProps> = ({
         <div className="absolute bottom-3 left-3 z-10 select-none">
           <button
             onClick={() => setShowLegend(!showLegend)}
-            className="px-2.5 py-1 text-xs font-medium text-slate-300 bg-[#12152A]/90 hover:bg-[#12152A] border border-[#ffffff14] rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
+            className="px-2.5 py-1 text-xs font-medium text-[#4a5566] bg-[#f8f9fb]/90 hover:bg-[#f8f9fb] border border-[#18202c1f] rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
           >
-            <Info className="w-3.5 h-3.5 text-indigo-400" />
+            <Info className="w-3.5 h-3.5 text-[#0b7a83]" />
             <span>Legend</span>
           </button>
           {showLegend && (
-            <div className="absolute bottom-9 left-0 bg-[#12152A]/95 backdrop-blur-md border border-[#ffffff14] rounded-xl p-3 z-10 text-[11px] space-y-2 select-none pointer-events-auto w-[240px] shadow-2xl animate-in fade-in duration-150">
-              <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
+            <div className="absolute bottom-9 left-0 bg-[#f8f9fb]/95 backdrop-blur-md border border-[#18202c1f] rounded-xl p-3 z-10 text-[11px] space-y-2 select-none pointer-events-auto w-[240px] shadow-2xl animate-in fade-in duration-150">
+              <div className="text-[10px] font-mono text-[#4a5566] uppercase tracking-wider font-semibold">
                 Legend
               </div>
               
               {/* Node colors */}
-              <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-slate-300">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[#4a5566]">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-sm bg-blue-500" />
                   <span>Service</span>
@@ -557,7 +558,7 @@ const InnerGraphCanvas: React.FC<GraphCanvasProps> = ({
               </div>
 
               {/* Edge styles */}
-              <div className="pt-2 border-t border-[#ffffff0f] space-y-1 text-slate-300">
+              <div className="pt-2 border-t border-[#18202c17] space-y-1 text-[#4a5566]">
                 <div className="flex items-center gap-2">
                   <span className="w-4 h-0.5 bg-emerald-500" />
                   <span>Verified</span>
@@ -567,7 +568,7 @@ const InnerGraphCanvas: React.FC<GraphCanvasProps> = ({
                   <span>Unverified</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-4 h-0.5 bg-slate-500 border-b border-dashed border-slate-500" />
+                  <span className="w-4 h-0.5 bg-[#7a8596] border-b border-dashed border-[#7a8596]" />
                   <span>Refuted</span>
                 </div>
                 <div className="flex items-center gap-2">

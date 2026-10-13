@@ -94,10 +94,10 @@ export const CustomEdge = memo(({
       opacity = Math.max(0.4, confidence);
     }
   } else if (status === 'refuted') {
-    strokeColor = '#6B7280'; // grey
+    strokeColor = '#7a8596'; // grey
     strokeDasharray = '5 5';
-    pillBorder = 'border-slate-500/80 border-dashed';
-    pillText = 'text-slate-400';
+    pillBorder = 'border-[#7a8596]/80 border-dashed';
+    pillText = 'text-[#4a5566]';
   } else if (status === 'human_invalidated') {
     strokeColor = '#E879F9'; // magenta
     strokeDasharray = '5 5';
@@ -147,8 +147,8 @@ export const CustomEdge = memo(({
         >
           <div
             title={`${fullRelationText} (${isAssetLayer ? 'Asset Layer' : 'Attack Layer'})`}
-            className={`px-2.5 py-0.5 rounded-full border bg-[#0B0D1A] text-[10px] font-mono font-medium flex items-center gap-1.5 shadow-md cursor-pointer transition-all hover:scale-105 select-none ${pillBorder} ${pillText} ${
-              selected ? 'ring-2 ring-indigo-500 shadow-indigo-500/20' : ''
+            className={`px-2.5 py-0.5 rounded-full border bg-[#eef1f5] text-[10px] font-mono font-medium flex items-center gap-1.5 shadow-md cursor-pointer transition-all hover:scale-105 select-none ${pillBorder} ${pillText} ${
+              selected ? 'ring-2 ring-[#0b7a83] shadow-[#0b7a83]/20' : ''
             }`}
             style={{ opacity }}
           >
@@ -158,7 +158,7 @@ export const CustomEdge = memo(({
               </span>
             )}
             <span title={fullRelationText}>{displayRelationText}</span>
-            <span className="px-1.5 py-0.5 rounded bg-white/10 font-bold text-[9px] text-slate-200">
+            <span className="px-1.5 py-0.5 rounded bg-white/10 font-bold text-[9px] text-[#18202c]">
               {confText}
             </span>
           </div>

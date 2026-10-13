@@ -2,33 +2,37 @@
 
 @layer base {
   :root {
-    --bg-deep: #0B0D1A;
-    --bg-surface: #12152A;
-    --bg-surface-elevated: #1A1D3B;
-    --bg-card: rgba(255, 255, 255, 0.03);
+    --bg-deep: #eef1f5;
+    --bg-surface: #f8f9fb;
+    --bg-surface-elevated: #ffffff;
+    --bg-card: rgba(24, 32, 44, 0.03);
     
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.16);
+    --border-subtle: rgba(24, 32, 44, 0.10);
+    --border-strong: rgba(24, 32, 44, 0.18);
     --radius-main: 12px;
 
-    --accent-indigo: #6366F1;
-    --accent-indigo-hover: #4F46E5;
+    --accent-indigo: #0b7a83;
+    --accent-indigo-hover: #095f66;
     
     /* Semantic Colors */
     --semantic-verified: #22C55E;
     --semantic-unverified: #F59E0B;
-    --semantic-refuted: #6B7280;
+    --semantic-refuted: #7a8596;
     --semantic-invalidated: #E879F9;
     --semantic-critical: #EF4444;
     --semantic-undermined: #F59E0B;
 
-    --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Archivo Variable', 'Arial Narrow', system-ui, sans-serif;
+    --font-ui: 'Public Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   }
 
   body {
     background-color: var(--bg-deep);
-    color: #F1F5F9;
+    /* TraceMap signature: faint ledger lines — the "paper" the case file sits on */
+    background-image: linear-gradient(transparent 31px, rgba(24, 32, 44, 0.035) 32px);
+    background-size: 100% 32px;
+    color: #18202c;
     font-family: var(--font-ui);
     font-size: 14px;
     margin: 0;
@@ -44,7 +48,7 @@
 }
 
 *:focus-visible {
-  outline: 2px solid #6366F1;
+  outline: 2px solid #0b7a83;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -53,20 +57,26 @@
   font-family: var(--font-mono);
 }
 
-/* Custom scrollbars */
+/* Custom scrollbars — clearly visible on the light theme so content reads as scrollable */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #9aa5b4 #e4e8ee;
+}
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 11px;
+  height: 11px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-deep);
+  background: #e4e8ee;
+  border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-subtle);
-  border-radius: 6px;
+  background: #aab3c0;
+  border-radius: 8px;
+  border: 2px solid #e4e8ee;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-strong);
+  background: #7a8596;
 }
 
 /* Glow effects restricted to critical & selected nodes */
@@ -75,16 +85,155 @@
 }
 
 .glow-selected {
-  box-shadow: 0 0 16px -2px rgba(99, 102, 241, 0.6), 0 0 4px 0px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 16px -2px rgba(11, 122, 131, 0.6), 0 0 4px 0px rgba(11, 122, 131, 0.4);
 }
 
 @keyframes pulse600 {
   0% { transform: scale(1); opacity: 0.4; }
-  50% { transform: scale(1.06); opacity: 1; filter: drop-shadow(0 0 8px #6366F1); }
+  50% { transform: scale(1.06); opacity: 1; filter: drop-shadow(0 0 8px #0b7a83); }
   100% { transform: scale(1); opacity: 1; }
 }
 
 .replay-pulse {
   animation: pulse600 600ms ease-in-out 1;
 }
+
+/* ============================================================
+   Motion system — adapted from TraceMap's "case-file" dossier
+   (stamp-in spring, fade-up, pulse ring, bar grow), restyled
+   for the AttackGraph dark SOC theme. All motion is guarded by
+   prefers-reduced-motion so it degrades gracefully.
+   ============================================================ */
+@keyframes ag-stamp-in {
+  from { transform: rotate(-3deg) scale(1.7); opacity: 0; }
+  to   { transform: rotate(-3deg) scale(1); opacity: 1; }
+}
+@keyframes ag-fade-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes ag-pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  50%      { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.18); }
+}
+@keyframes ag-bar-grow { from { width: 0; } }
+@keyframes ag-sheen {
+  0%   { background-position: -120% 0; }
+  100% { background-position: 220% 0; }
+}
+
+/* Verdict stamp — the signature "stamp" element ported from TraceMap,
+   recoloured for dark. Rose double-border = CONFIRMED/critical verdict;
+   .clear (emerald) = benign/no-finding verdict. */
+.verdict-stamp {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 7px 15px 6px;
+  transform: rotate(-3deg);
+  transform-origin: left center;
+  border: 2.5px double #be123c;
+  color: #be123c;
+  border-radius: 5px;
+  background: rgba(239, 68, 68, 0.06);
+  mix-blend-mode: multiply;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.verdict-stamp small {
+  display: block;
+  margin-top: 5px;
+  font: 600 10px/1.2 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--semantic-refuted);
+}
+.verdict-stamp.clear {
+  border-color: #0b7a83;
+  color: #0b7a83;
+  background: rgba(11, 122, 131, 0.06);
+}
+.verdict-stamp.warn {
+  border-color: #b45309;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.06);
+}
+
+/* Finding-state severity chips (CONFIRMED / HYPOTHESIS / INCONCLUSIVE) */
+.sev-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 600 10px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 7px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+.sev-chip.confirmed   { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.4); }
+.sev-chip.hypothesis  { background: rgba(245, 158, 11, 0.12); color: #fcd34d; border-color: rgba(245, 158, 11, 0.35); }
+.sev-chip.inconclusive{ background: rgba(107, 114, 128, 0.15); color: #4a5566; border-color: rgba(148, 163, 184, 0.3); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .verdict-stamp { animation: ag-stamp-in 0.4s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+  .ag-fade-up    { animation: ag-fade-up 0.42s ease-out both; }
+  .pulse-ring    { animation: ag-pulse-ring 1.8s ease-in-out infinite; }
+  .ag-bar > i    { animation: ag-bar-grow 0.5s ease-out both; }
+}
+
+/* ============================================================
+   TraceMap typography + buttons (ported from its styles.css)
+   Condensed Archivo display headings, mono "eyebrow" labels,
+   and the signature ink-fill "case file" button.
+   ============================================================ */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.font-display { font-family: var(--font-display); font-stretch: 112%; }
+
+.eyebrow {
+  font: 600 12px/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a8596;
+}
+
+/* Ink-fill button — exactly TraceMap's .btn (ink bg, sheet text, 6px, 2px border) */
+.btn-ink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: none;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 2px solid #18202c;
+  background: #18202c;
+  color: #f8f9fb;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+.btn-ink:hover { background: #2a3546; }
+.btn-ink:active { transform: translateY(1px); }
+.btn-ink:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ink.ghost { background: transparent; color: #18202c; }
+.btn-ink.ghost:hover { background: #e9edf2; }
+.btn-ink.small { padding: 6px 12px; font-size: 12.5px; border-width: 1.5px; border-radius: 6px; }
+.btn-ink.small svg { width: 14px; height: 14px; }
+/* Accent variant keeps the ink shape but uses the tracer-dye teal */
+.btn-ink.accent { border-color: #0b7a83; background: #0b7a83; color: #ffffff; }
+.btn-ink.accent:hover { background: #095f66; }
 

@@ -162,25 +162,68 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
     }
   };
 
+  // Overall verdict (TraceMap "stamp" pattern): a confirmed finding is one whose
+  // supporting edge is verified; a critical bottleneck escalates the verdict.
+  const verifiedFindings = findingRows.filter((r) => r.edgeStatus === 'verified');
+  const confirmedCount = verifiedFindings.length;
+  const criticalConfirmed = verifiedFindings.some((r) => r.node.is_critical);
+  const hypothesisCount = findingRows.length - confirmedCount;
+
   if (findingRows.length === 0) {
     return (
-      <div className="flex-1 bg-[#0B0D1A] flex flex-col items-center justify-center text-slate-400 gap-3 p-12 select-none font-sans">
-        <ShieldAlert className="w-12 h-12 text-indigo-400/40 stroke-[1.5]" />
-        <span className="text-sm font-mono">No findings yet.</span>
+      <div className="flex-1 bg-[#eef1f5] flex flex-col items-center justify-center text-[#4a5566] gap-3 p-12 select-none font-sans">
+        <ShieldAlert className="w-12 h-12 text-[#0b7a83]/50 stroke-[1.5]" />
+        <span className="text-base font-semibold text-[#18202c]">No findings yet</span>
+        <span className="text-sm max-w-[380px] text-center">Run a scan from the top bar. Confirmed and hypothesized issues, with their evidence, will be listed here.</span>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 bg-[#0B0D1A] flex flex-col overflow-y-auto p-6 space-y-4 select-none font-sans text-slate-200">
+    <div className="flex-1 bg-[#eef1f5] flex flex-col overflow-y-auto p-6 space-y-4 select-none font-sans text-[#18202c]">
+      {/* Verdict banner — signature "stamp" (ported & dark-themed from TraceMap) */}
+      <div className="flex items-center gap-5 flex-wrap pl-1 pt-1">
+        {confirmedCount > 0 ? (
+          <div className="verdict-stamp" key={criticalConfirmed ? 'crit' : 'conf'}>
+            {criticalConfirmed ? 'Attack path confirmed' : 'Findings confirmed'}
+            <small>
+              {confirmedCount} verified finding{confirmedCount === 1 ? '' : 's'}
+              {criticalConfirmed ? ' · critical bottleneck present' : ''}
+            </small>
+          </div>
+        ) : (
+          <div className="verdict-stamp warn" key="hypo">
+            Hypotheses only
+            <small>no finding verified by differential execution yet</small>
+          </div>
+        )}
+
+        {/* Inline ledger-style counts */}
+        <div className="flex items-stretch gap-6 border-l border-[#18202c1f] pl-5">
+          <div>
+            <div className="text-[22px] font-bold font-mono text-rose-300 leading-none">{confirmedCount}</div>
+            <div className="text-[11px] text-[#4a5566] mt-1">Confirmed</div>
+          </div>
+          <div>
+            <div className="text-[22px] font-bold font-mono text-amber-300 leading-none">{hypothesisCount}</div>
+            <div className="text-[11px] text-[#4a5566] mt-1">Hypotheses</div>
+          </div>
+          <div>
+            <div className="text-[22px] font-bold font-mono text-[#18202c] leading-none">{findingRows.length}</div>
+            <div className="text-[11px] text-[#4a5566] mt-1">Total</div>
+          </div>
+        </div>
+      </div>
+
       {/* Header & Filter Controls */}
-      <div className="bg-[#12152A] border border-[#ffffff14] rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+      <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xl">
         <div>
-          <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-            Discovered Security Findings & Secrets ({filteredAndSortedRows.length})
+          <p className="eyebrow mb-1.5">Case file · findings</p>
+          <h2 className="text-2xl font-extrabold text-[#18202c] flex items-center gap-2 tracking-tight">
+            Discovered security findings &amp; secrets ({filteredAndSortedRows.length})
           </h2>
-          <p className="text-xs text-slate-400 font-sans">
-            Consolidated table of access control issues, reflected input observations, and exposed secrets
+          <p className="text-sm text-[#4a5566] mt-1">
+            Access control issues, reflected input observations, and exposed secrets, with the evidence behind each.
           </p>
         </div>
 
@@ -191,7 +234,7 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
                 type="button"
                 onClick={() => handleDownload('pdf')}
                 disabled={downloadingFormat !== null}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-semibold hover:bg-rose-500/25 transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+                className="btn-ink ghost small"
                 title="Download Executive Summary PDF Report via authenticated stream"
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -201,7 +244,7 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
                 type="button"
                 onClick={() => handleDownload('sarif')}
                 disabled={downloadingFormat !== null}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-xs font-semibold hover:bg-indigo-500/25 transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+                className="btn-ink accent small"
                 title="Download OASIS SARIF v2.1.0 JSON via authenticated stream"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -212,11 +255,11 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
 
           {/* Type Filter */}
           <div className="relative flex items-center">
-            <Filter className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" />
+            <Filter className="w-3.5 h-3.5 text-[#4a5566] absolute left-2.5 pointer-events-none" />
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="bg-[#0B0D1A] border border-[#ffffff14] text-xs text-slate-200 rounded-xl pl-8 pr-4 py-1.5 focus:outline-none focus:border-[#6366F1] cursor-pointer appearance-none"
+              className="bg-[#eef1f5] border border-[#18202c1f] text-xs text-[#18202c] rounded-xl pl-8 pr-4 py-1.5 focus:outline-none focus:border-[#0b7a83] cursor-pointer appearance-none"
             >
               <option value="ALL">All Types</option>
               <option value="ACCESS_CONTROL">Access Control</option>
@@ -231,7 +274,7 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-[#0B0D1A] border border-[#ffffff14] text-xs text-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#6366F1] cursor-pointer appearance-none"
+              className="bg-[#eef1f5] border border-[#18202c1f] text-xs text-[#18202c] rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#0b7a83] cursor-pointer appearance-none"
             >
               <option value="ALL">All Edge Statuses</option>
               <option value="verified">Verified</option>
@@ -244,38 +287,38 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
       </div>
 
       {/* Findings Table */}
-      <div className="bg-[#12152A] border border-[#ffffff14] rounded-2xl overflow-hidden shadow-xl">
-        <table className="w-full text-left border-collapse">
+      <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-2xl overflow-x-auto shadow-xl">
+        <table className="w-full min-w-[920px] text-left border-collapse">
           <thead>
-            <tr className="bg-[#0B0D1A] border-b border-[#ffffff14] text-[12px] font-medium text-slate-400 select-none">
+            <tr className="bg-[#eef1f5] border-b border-[#18202c1f] text-[12px] font-medium text-[#4a5566] select-none">
               <th className="p-3.5">Finding Label</th>
               <th className="p-3.5">Type</th>
               <th className="p-3.5">Source Endpoint</th>
               <th className="p-3.5">Relation</th>
-              <th className="p-3.5 cursor-pointer hover:text-slate-200" onClick={() => toggleSort('confidence')}>
+              <th className="p-3.5 cursor-pointer hover:text-[#18202c]" onClick={() => toggleSort('confidence')}>
                 <div className="flex items-center gap-1">
                   <span>Confidence</span>
-                  <ArrowUpDown className="w-3 h-3 text-indigo-400" />
+                  <ArrowUpDown className="w-3 h-3 text-[#0b7a83]" />
                 </div>
               </th>
               <th className="p-3.5">Status</th>
               <th className="p-3.5">Flags</th>
-              <th className="p-3.5 cursor-pointer hover:text-slate-200" onClick={() => toggleSort('time')}>
+              <th className="p-3.5 cursor-pointer hover:text-[#18202c]" onClick={() => toggleSort('time')}>
                 <div className="flex items-center gap-1">
                   <span>Discovered</span>
-                  <ArrowUpDown className="w-3 h-3 text-indigo-400" />
+                  <ArrowUpDown className="w-3 h-3 text-[#0b7a83]" />
                 </div>
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#ffffff0a] text-xs">
+          <tbody className="divide-y divide-[#18202c12] text-xs">
             {filteredAndSortedRows.map((row) => {
               const node = row.node;
               const confText = row.confidence != null ? row.confidence.toFixed(2) : 'N/A';
 
               let statusStyle = 'bg-amber-500/15 text-amber-400 border-amber-500/30';
               if (row.edgeStatus === 'verified') statusStyle = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
-              if (row.edgeStatus === 'refuted') statusStyle = 'bg-slate-500/15 text-slate-400 border-slate-500/30';
+              if (row.edgeStatus === 'refuted') statusStyle = 'bg-[#7a8596]/15 text-[#4a5566] border-[#7a8596]/30';
               if (row.edgeStatus === 'human_invalidated') statusStyle = 'bg-pink-500/15 text-pink-400 border-pink-500/30';
 
               const createdTime = node.created_at || (node.properties?.created_at as string) || row.createdAt;
@@ -284,10 +327,10 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
                 <tr
                   key={node.id}
                   onClick={() => onSelectFindingNode(node)}
-                  className="hover:bg-[#1A1D3B]/60 transition-colors cursor-pointer"
+                  className="hover:bg-[#ffffff]/60 transition-colors cursor-pointer"
                 >
                   {/* Label */}
-                  <td className="p-3.5 font-semibold text-slate-100 max-w-[220px] truncate">
+                  <td className="p-3.5 font-semibold text-[#18202c] max-w-[220px] truncate">
                     <div className="flex items-center gap-2">
                       {getIcon(node.node_type)}
                       <span className="truncate" title={node.label}>{node.label}</span>
@@ -296,23 +339,23 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
 
                   {/* Type Badge */}
                   <td className="p-3.5">
-                    <span className="text-[11px] font-sans px-2 py-0.5 rounded-md bg-[#6366F1]/15 text-indigo-300 border border-[#6366F1]/30">
+                    <span className="text-[11px] font-sans px-2 py-0.5 rounded-md bg-[#0b7a83]/15 text-[#0b7a83] border border-[#0b7a83]/30">
                       {node.node_type.replace(/_/g, ' ')}
                     </span>
                   </td>
 
                   {/* Source Endpoint */}
-                  <td className="p-3.5 font-mono text-indigo-300 max-w-[180px] truncate">
+                  <td className="p-3.5 font-mono text-[#0b7a83] max-w-[180px] truncate">
                     <span title={row.sourceEndpoint}>{row.sourceEndpoint}</span>
                   </td>
 
                   {/* Relation */}
-                  <td className="p-3.5 text-slate-300">
+                  <td className="p-3.5 text-[#4a5566]">
                     {humaniseRelation(row.relationType)}
                   </td>
 
                   {/* Confidence (Neutral color) */}
-                  <td className="p-3.5 font-mono font-semibold text-slate-200">
+                  <td className="p-3.5 font-mono font-semibold text-[#18202c]">
                     {confText}
                   </td>
 
@@ -356,13 +399,13 @@ export const FindingsView: React.FC<FindingsViewProps> = ({
                         </span>
                       )}
                       {!node.is_critical && !node.undermined && !node.properties?.cwe && !node.properties?.owasp && (
-                        <span className="text-slate-600 font-mono text-[10px]">-</span>
+                        <span className="text-[#7a8596] font-mono text-[10px]">-</span>
                       )}
                     </div>
                   </td>
 
                   {/* Discovered Time */}
-                  <td className="p-3.5 text-slate-400 font-sans text-[11px]">
+                  <td className="p-3.5 text-[#4a5566] font-sans text-[11px]">
                     {formatTimestamp(createdTime)}
                   </td>
                 </tr>

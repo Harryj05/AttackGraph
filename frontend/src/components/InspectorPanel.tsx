@@ -172,7 +172,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
     if (type.includes('access_control')) return <ShieldAlert className="w-4 h-4 text-rose-400" />;
     if (type.includes('reflected_input')) return <Terminal className="w-4 h-4 text-orange-400" />;
     if (type.includes('finding') || type.includes('vulnerability')) return <Flame className="w-4 h-4 text-rose-400" />;
-    return <Database className="w-4 h-4 text-slate-400" />;
+    return <Database className="w-4 h-4 text-[#4a5566]" />;
   };
 
   // Humanised relation string via lookup map
@@ -191,12 +191,12 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   }
 
   return (
-    <aside className="w-[320px] bg-[#0B0D1A] border-l border-[#ffffff14] flex flex-col shrink-0 select-none overflow-hidden h-full z-20">
+    <aside className="w-[320px] bg-[#eef1f5] border-l border-[#18202c1f] flex flex-col shrink-0 select-none overflow-hidden h-full z-20">
       {/* 1. Inspector Header & Close Button */}
-      <div className="h-14 px-4 bg-[#12152A] border-b border-[#ffffff14] flex items-center justify-between shrink-0">
+      <div className="h-14 px-4 bg-[#f8f9fb] border-b border-[#18202c1f] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-indigo-400" />
-          <h2 className="text-xs font-bold text-slate-100 uppercase tracking-wider">
+          <Sliders className="w-4 h-4 text-[#0b7a83]" />
+          <h2 className="text-xs font-bold text-[#18202c] uppercase tracking-wider">
             Inspector
           </h2>
         </div>
@@ -204,7 +204,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
         {onClose && (
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-800/50 transition-colors cursor-pointer"
+            className="text-[#4a5566] hover:text-[#18202c] p-1.5 rounded-lg hover:bg-[#e4e8ee]/50 transition-colors cursor-pointer"
             title="Close Inspector"
           >
             <X className="w-4 h-4" />
@@ -213,13 +213,13 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
       </div>
 
       {/* 2. Tab Navigation Bar */}
-      <div className="grid grid-cols-3 bg-[#12152A] border-b border-[#ffffff14] p-1 gap-1 shrink-0">
+      <div className="grid grid-cols-3 bg-[#f8f9fb] border-b border-[#18202c1f] p-1 gap-1 shrink-0">
         <button
           onClick={() => setActiveTab('node')}
           className={`py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
             activeTab === 'node'
-              ? 'bg-[#6366F1] text-white font-semibold shadow-sm'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+              ? 'bg-[#0b7a83] text-white font-semibold shadow-sm'
+              : 'text-[#4a5566] hover:text-[#18202c] hover:bg-[#e4e8ee]/40'
           }`}
         >
           Node {selectedNode && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block ml-1" />}
@@ -229,8 +229,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
           onClick={() => setActiveTab('edge')}
           className={`py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
             activeTab === 'edge'
-              ? 'bg-[#6366F1] text-white font-semibold shadow-sm'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+              ? 'bg-[#0b7a83] text-white font-semibold shadow-sm'
+              : 'text-[#4a5566] hover:text-[#18202c] hover:bg-[#e4e8ee]/40'
           }`}
         >
           Edge {selectedEdge && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block ml-1" />}
@@ -240,8 +240,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
           onClick={() => setActiveTab('scan')}
           className={`py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
             activeTab === 'scan'
-              ? 'bg-[#6366F1] text-white font-semibold shadow-sm'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+              ? 'bg-[#0b7a83] text-white font-semibold shadow-sm'
+              : 'text-[#4a5566] hover:text-[#18202c] hover:bg-[#e4e8ee]/40'
           }`}
         >
           Scan
@@ -255,20 +255,20 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
           selectedNode ? (
             <div className="space-y-4">
               {/* Header Card */}
-              <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3.5 space-y-2">
+              <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3.5 space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     {getNodeIcon(selectedNode.node_type)}
-                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#6366F1]/15 text-indigo-300 border border-[#6366F1]/30">
+                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#0b7a83]/15 text-[#0b7a83] border border-[#0b7a83]/30">
                       {selectedNode.node_type}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400">
+                  <span className="text-[10px] font-mono text-[#4a5566]">
                     #{selectedNode.id.slice(0, 6)}
                   </span>
                 </div>
 
-                <h3 className="text-sm font-bold text-slate-100 font-sans break-all">
+                <h3 className="text-sm font-bold text-[#18202c] font-sans break-all">
                   {selectedNode.label}
                 </h3>
 
@@ -306,17 +306,17 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
               {/* Overview Section */}
               <div className="space-y-1.5">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#4a5566]">
                   Overview
                 </h4>
-                <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3 text-xs space-y-2">
+                <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3 text-xs space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Node Type</span>
-                    <span className="font-mono text-slate-200">{selectedNode.node_type}</span>
+                    <span className="text-[#4a5566]">Node Type</span>
+                    <span className="font-mono text-[#18202c]">{selectedNode.node_type}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Discovered</span>
-                    <span className="font-mono text-slate-200">
+                    <span className="text-[#4a5566]">Discovered</span>
+                    <span className="font-mono text-[#18202c]">
                       {selectedNode.properties?.created_at
                         ? new Date(selectedNode.properties.created_at).toLocaleTimeString()
                         : 'Initial Scan'}
@@ -327,22 +327,22 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
               {/* Properties Table */}
               <div className="space-y-1.5">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#4a5566]">
                   Properties
                 </h4>
-                <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3 space-y-2 text-xs">
+                <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3 space-y-2 text-xs">
                   {Object.keys(selectedNode.properties || {}).length === 0 ? (
-                    <span className="text-slate-500 italic text-xs">No extra properties</span>
+                    <span className="text-[#7a8596] italic text-xs">No extra properties</span>
                   ) : (
                     Object.entries(selectedNode.properties || {}).map(([key, val]) => {
                       const valStr = typeof val === 'object' ? JSON.stringify(val) : String(val);
                       return (
-                        <div key={key} className="flex flex-col gap-1 pb-1.5 border-b border-[#ffffff0a] last:border-0 last:pb-0">
+                        <div key={key} className="flex flex-col gap-1 pb-1.5 border-b border-[#18202c12] last:border-0 last:pb-0">
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-400 font-mono text-[11px]">{key}</span>
+                            <span className="text-[#4a5566] font-mono text-[11px]">{key}</span>
                             <button
                               onClick={() => copyToClipboard(valStr, `prop-${key}`)}
-                              className="text-slate-500 hover:text-slate-300 p-0.5 rounded cursor-pointer"
+                              className="text-[#7a8596] hover:text-[#4a5566] p-0.5 rounded cursor-pointer"
                               title="Copy value"
                             >
                               {copiedKey === `prop-${key}` ? (
@@ -352,7 +352,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                               )}
                             </button>
                           </div>
-                          <span className="font-mono text-xs text-indigo-300 break-all bg-[#0B0D1A] p-1.5 rounded-lg border border-[#ffffff0a]">
+                          <span className="font-mono text-xs text-[#0b7a83] break-all bg-[#eef1f5] p-1.5 rounded-lg border border-[#18202c12]">
                             {valStr}
                           </span>
                         </div>
@@ -364,11 +364,11 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
               {/* Relationships Section */}
               <div className="space-y-1.5">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#4a5566]">
                   Relationships ({nodeRelationships.length})
                 </h4>
                 {nodeRelationships.length === 0 ? (
-                  <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3 text-xs text-slate-500 text-center italic">
+                  <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3 text-xs text-[#7a8596] text-center italic">
                     No connected edges
                   </div>
                 ) : (
@@ -381,7 +381,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
                       let chipStyle = 'bg-amber-500/15 text-amber-400 border-amber-500/30';
                       if (relEdge.status === 'verified') chipStyle = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
-                      if (relEdge.status === 'refuted') chipStyle = 'bg-slate-500/15 text-slate-400 border-slate-500/30';
+                      if (relEdge.status === 'refuted') chipStyle = 'bg-[#7a8596]/15 text-[#4a5566] border-[#7a8596]/30';
                       if (relEdge.status === 'human_invalidated') chipStyle = 'bg-pink-500/15 text-pink-400 border-pink-500/30';
 
                       return (
@@ -391,22 +391,22 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                             onSelectEdge(relEdge);
                             onSelectNode(null);
                           }}
-                          className="bg-[#12152A] border border-[#ffffff14] hover:border-[#6366F1]/50 rounded-xl p-2.5 text-xs transition-all cursor-pointer space-y-1.5"
+                          className="bg-[#f8f9fb] border border-[#18202c1f] hover:border-[#0b7a83]/50 rounded-xl p-2.5 text-xs transition-all cursor-pointer space-y-1.5"
                         >
                           <div className="flex items-center justify-between">
-                            <span className="flex items-center gap-1 font-mono text-indigo-400 text-[11px]">
-                              {isOutgoing ? <ArrowRight className="w-3.5 h-3.5 text-emerald-400" /> : <ArrowLeft className="w-3.5 h-3.5 text-indigo-400" />}
+                            <span className="flex items-center gap-1 font-mono text-[#0b7a83] text-[11px]">
+                              {isOutgoing ? <ArrowRight className="w-3.5 h-3.5 text-emerald-400" /> : <ArrowLeft className="w-3.5 h-3.5 text-[#0b7a83]" />}
                               {humaniseRelation(relEdge.relation_type)}
                             </span>
                             <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border uppercase ${chipStyle}`}>
                               {relEdge.status}
                             </span>
                           </div>
-                          <div className="flex items-start justify-between text-slate-300 gap-2">
+                          <div className="flex items-start justify-between text-[#4a5566] gap-2">
                             <span className="break-words whitespace-normal font-sans">
                               {otherNode?.label || otherNodeId.slice(0, 8)}
                             </span>
-                            <span className="font-mono text-[10px] text-slate-400 shrink-0">
+                            <span className="font-mono text-[10px] text-[#4a5566] shrink-0">
                               conf: {confText}
                             </span>
                           </div>
@@ -419,12 +419,12 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
               {/* Evidence Accordion */}
               <div className="space-y-1.5">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#4a5566]">
                   Linked Evidence ({evidenceList.length})
                 </h4>
 
                 {loadingEvidence ? (
-                  <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-4 text-center text-xs font-mono text-indigo-400 gap-2 flex items-center justify-center animate-pulse">
+                  <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-4 text-center text-xs font-mono text-[#0b7a83] gap-2 flex items-center justify-center animate-pulse">
                     <RefreshCw className="w-4 h-4 animate-spin" />
                     <span>Loading evidence...</span>
                   </div>
@@ -433,19 +433,19 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                     {evidenceError}
                   </div>
                 ) : evidenceList.length === 0 ? (
-                  <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3 text-xs text-slate-500 text-center italic">
+                  <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3 text-xs text-[#7a8596] text-center italic">
                     No evidence recorded for this node
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {evidenceList.map((ev) => (
-                      <div key={ev.id} className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3 space-y-2 text-xs">
+                      <div key={ev.id} className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3 space-y-2 text-xs">
                         <div className="flex items-center justify-between">
                           <span className="font-mono font-semibold text-amber-400 flex items-center gap-1.5">
-                            <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                            <FileText className="w-3.5 h-3.5 text-[#0b7a83]" />
                             {ev.tool_name}
                           </span>
-                          <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+                          <span className="text-[10px] font-mono text-[#4a5566] flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {new Date(ev.timestamp).toLocaleTimeString()}
                           </span>
@@ -453,11 +453,11 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
                         {/* Parsed Findings Summary - wrap long finding names with full text */}
                         {ev.parsed_findings && (
-                          <div className="bg-[#0B0D1A] p-2 rounded-lg border border-[#ffffff0a] font-mono text-[11px] space-y-1.5">
+                          <div className="bg-[#eef1f5] p-2 rounded-lg border border-[#18202c12] font-mono text-[11px] space-y-1.5">
                             {Object.entries(ev.parsed_findings).map(([k, v]) => (
                               <div key={k} className="flex flex-col gap-0.5">
-                                <span className="text-slate-400 break-words">{k}:</span>
-                                <span className="text-slate-200 break-words break-all whitespace-normal">
+                                <span className="text-[#4a5566] break-words">{k}:</span>
+                                <span className="text-[#18202c] break-words break-all whitespace-normal">
                                   {typeof v === 'object' ? JSON.stringify(v) : String(v)}
                                 </span>
                               </div>
@@ -471,7 +471,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                             <div className="flex items-center justify-between pt-1">
                               <button
                                 onClick={() => setExpandedEvidenceId(expandedEvidenceId === ev.id ? null : ev.id)}
-                                className="text-[11px] font-mono text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+                                className="text-[11px] font-mono text-[#0b7a83] hover:underline flex items-center gap-1 cursor-pointer"
                               >
                                 {expandedEvidenceId === ev.id ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                                 <span>{expandedEvidenceId === ev.id ? 'Hide Raw Output' : 'View Raw Output'}</span>
@@ -479,7 +479,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                               {expandedEvidenceId === ev.id && (
                                 <button
                                   onClick={() => copyToClipboard(ev.raw_output || '', `raw-${ev.id}`)}
-                                  className="text-slate-400 hover:text-slate-200 p-1 rounded cursor-pointer"
+                                  className="text-[#4a5566] hover:text-[#18202c] p-1 rounded cursor-pointer"
                                   title="Copy raw output"
                                 >
                                   {copiedKey === `raw-${ev.id}` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -488,7 +488,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                             </div>
 
                             {expandedEvidenceId === ev.id && (
-                              <pre className="mt-2 p-2.5 bg-[#0B0D1A] text-slate-200 font-mono text-[10px] rounded-lg border border-[#ffffff0a] max-h-48 overflow-y-auto whitespace-pre-wrap break-all leading-relaxed">
+                              <pre className="mt-2 p-2.5 bg-[#eef1f5] text-[#18202c] font-mono text-[10px] rounded-lg border border-[#18202c12] max-h-48 overflow-y-auto whitespace-pre-wrap break-all leading-relaxed">
                                 {ev.raw_output}
                               </pre>
                             )}
@@ -502,9 +502,9 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             </div>
           ) : (
             <div className="text-center py-12 space-y-3">
-              <Info className="w-8 h-8 text-indigo-400/40 mx-auto" />
-              <p className="text-xs text-slate-400 font-mono">No node selected.</p>
-              <p className="text-[11px] text-slate-500 max-w-[220px] mx-auto">
+              <Info className="w-8 h-8 text-[#0b7a83]/40 mx-auto" />
+              <p className="text-xs text-[#4a5566] font-mono">No node selected.</p>
+              <p className="text-[11px] text-[#7a8596] max-w-[220px] mx-auto">
                 Click any node on the graph canvas to inspect properties, flags, and evidence.
               </p>
             </div>
@@ -516,8 +516,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
           selectedEdge ? (
             <div className="space-y-4">
               {/* Header Connection Chain */}
-              <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3.5 space-y-2">
-                <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center justify-between">
+              <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3.5 space-y-2">
+                <div className="text-[10px] font-mono text-[#4a5566] uppercase tracking-wider flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span>EDGE #{selectedEdge.id.slice(0, 8)}</span>
                     <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider border ${
@@ -534,7 +534,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                       : selectedEdge.status === 'human_invalidated'
                       ? 'bg-pink-500/15 text-pink-400 border-pink-500/30'
                       : selectedEdge.status === 'refuted'
-                      ? 'bg-slate-500/15 text-slate-400 border-slate-500/30'
+                      ? 'bg-[#7a8596]/15 text-[#4a5566] border-[#7a8596]/30'
                       : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
                   }`}>
                     {selectedEdge.status}
@@ -544,19 +544,19 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 <div className="space-y-1.5 pt-1 font-mono text-xs">
                   <button
                     onClick={() => sourceNode && onSelectNode(sourceNode)}
-                    className="text-left font-semibold text-slate-200 hover:text-indigo-300 hover:underline block break-words whitespace-normal w-full cursor-pointer"
+                    className="text-left font-semibold text-[#18202c] hover:text-[#0b7a83] hover:underline block break-words whitespace-normal w-full cursor-pointer"
                   >
                     {sourceNode?.label || selectedEdge.source_node_id}
                   </button>
 
-                  <div className="flex items-center gap-1.5 text-indigo-400 font-bold text-[11px] py-1">
+                  <div className="flex items-center gap-1.5 text-[#0b7a83] font-bold text-[11px] py-1">
                     <ArrowRight className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span className="break-words">{formatRelationType(selectedEdge.relation_type)}</span>
                   </div>
 
                   <button
                     onClick={() => targetNode && onSelectNode(targetNode)}
-                    className="text-left font-semibold text-slate-200 hover:text-indigo-300 hover:underline block break-words whitespace-normal w-full cursor-pointer"
+                    className="text-left font-semibold text-[#18202c] hover:text-[#0b7a83] hover:underline block break-words whitespace-normal w-full cursor-pointer"
                   >
                     {targetNode?.label || selectedEdge.target_node_id}
                   </button>
@@ -564,22 +564,22 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               </div>
 
               {/* Confidence Score Bars */}
-              <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3.5 space-y-3">
-                <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+              <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3.5 space-y-3">
+                <div className="text-[10px] font-mono text-[#4a5566] uppercase tracking-wider">
                   Confidence Evaluation
                 </div>
 
                 {/* 1. Tool Evidence */}
                 <div className="space-y-1">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-400">Tool evidence</span>
-                    <span className="font-mono text-slate-200 font-semibold">
+                    <span className="text-[#4a5566]">Tool evidence</span>
+                    <span className="font-mono text-[#18202c] font-semibold">
                       {selectedEdge.evidence_only_confidence != null
                         ? `${(selectedEdge.evidence_only_confidence * 100).toFixed(0)}%`
                         : 'N/A'}
                     </span>
                   </div>
-                  <div className="w-full h-1.5 bg-[#0B0D1A] rounded-full overflow-hidden border border-[#ffffff0a]">
+                  <div className="w-full h-1.5 bg-[#eef1f5] rounded-full overflow-hidden border border-[#18202c12]">
                     <div
                       className="h-full bg-cyan-400 transition-all duration-300"
                       style={{
@@ -592,14 +592,14 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 {/* 2. Blended via Empirical Smoothing */}
                 <div className="space-y-1">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-400">Empirical smoothing prior</span>
+                    <span className="text-[#4a5566]">Empirical smoothing prior</span>
                     <span className="font-mono text-emerald-400 font-semibold">
                       {selectedEdge.confidence != null
                         ? `${(selectedEdge.confidence * 100).toFixed(0)}%`
                         : 'N/A'}
                     </span>
                   </div>
-                  <div className="w-full h-1.5 bg-[#0B0D1A] rounded-full overflow-hidden border border-[#ffffff0a]">
+                  <div className="w-full h-1.5 bg-[#eef1f5] rounded-full overflow-hidden border border-[#18202c12]">
                     <div
                       className="h-full bg-emerald-400 transition-all duration-300"
                       style={{
@@ -609,36 +609,36 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                   </div>
                 </div>
 
-                <div className="text-[10px] text-slate-400 italic pt-1 border-t border-[#ffffff0a]">
+                <div className="text-[10px] text-[#4a5566] italic pt-1 border-t border-[#18202c12]">
                   Empirical smoothing = evidence weighted against empirical historical pattern outcomes
                 </div>
               </div>
 
               {/* Edge Details List */}
-              <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3.5 space-y-2 text-xs">
+              <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3.5 space-y-2 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Verification Outcome</span>
-                  <span className="font-mono text-slate-200">{selectedEdge.verification_outcome || 'None'}</span>
+                  <span className="text-[#4a5566]">Verification Outcome</span>
+                  <span className="font-mono text-[#18202c]">{selectedEdge.verification_outcome || 'None'}</span>
                 </div>
                 {selectedEdge.step != null && (
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Agent Step</span>
-                    <span className="font-mono text-indigo-300">Step #{selectedEdge.step}</span>
+                    <span className="text-[#4a5566]">Agent Step</span>
+                    <span className="font-mono text-[#0b7a83]">Step #{selectedEdge.step}</span>
                   </div>
                 )}
                 {selectedEdge.pattern_key && (
-                  <div className="flex flex-col gap-1 pt-1 border-t border-[#ffffff0a]">
+                  <div className="flex flex-col gap-1 pt-1 border-t border-[#18202c12]">
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400 text-[11px]">Pattern Key</span>
+                      <span className="text-[#4a5566] text-[11px]">Pattern Key</span>
                       <button
                         onClick={() => copyToClipboard(selectedEdge.pattern_key || '', 'pattern_key')}
-                        className="text-slate-500 hover:text-slate-300 p-0.5 rounded cursor-pointer"
+                        className="text-[#7a8596] hover:text-[#4a5566] p-0.5 rounded cursor-pointer"
                         title="Copy pattern key"
                       >
                         {copiedKey === 'pattern_key' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                       </button>
                     </div>
-                    <span className="font-mono text-xs text-indigo-300 bg-[#0B0D1A] p-1.5 rounded-lg border border-[#ffffff0a] break-all">
+                    <span className="font-mono text-xs text-[#0b7a83] bg-[#eef1f5] p-1.5 rounded-lg border border-[#18202c12] break-all">
                       {selectedEdge.pattern_key}
                     </span>
                   </div>
@@ -648,18 +648,18 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               {/* Reasoning Block */}
               {selectedEdge.reasoning && (
                 <div className="space-y-1.5">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#4a5566]">
                     Reasoning
                   </h4>
-                  <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3 text-xs text-slate-200 leading-relaxed font-sans">
+                  <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3 text-xs text-[#18202c] leading-relaxed font-sans">
                     {selectedEdge.reasoning}
                   </div>
                 </div>
               )}
 
               {/* Human Review Section */}
-              <div className="space-y-2 pt-2 border-t border-[#ffffff14]">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+              <div className="space-y-2 pt-2 border-t border-[#18202c1f]">
+                <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#4a5566]">
                   Human Review
                 </h4>
 
@@ -695,7 +695,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                       </button>
                       <button
                         onClick={() => setConfirmInvalidate(false)}
-                        className="py-1.5 px-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs cursor-pointer"
+                        className="py-1.5 px-2 bg-[#cfd6df] hover:bg-[#7a8596] text-[#18202c] rounded-lg text-xs cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -725,20 +725,20 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               </div>
 
               {/* Re-verify Button */}
-              <div className="pt-2 border-t border-[#ffffff14]">
+              <div className="pt-2 border-t border-[#18202c1f]">
                 <button
                   onClick={handleReverify}
                   disabled={reverifying}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-[#12152A] text-indigo-300 border border-[#ffffff14] hover:bg-slate-800/50 transition-all cursor-pointer disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-[#f8f9fb] text-[#0b7a83] border border-[#18202c1f] hover:bg-[#e4e8ee]/50 transition-all cursor-pointer disabled:opacity-50"
                 >
                   {reverifying ? (
                     <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#0b7a83]" />
                       <span>Re-verifying tool execution...</span>
                     </>
                   ) : (
                     <>
-                      <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
+                      <RefreshCw className="w-3.5 h-3.5 text-[#0b7a83]" />
                       <span>Re-verify Edge</span>
                     </>
                   )}
@@ -759,9 +759,9 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             </div>
           ) : (
             <div className="text-center py-12 space-y-3">
-              <Info className="w-8 h-8 text-indigo-400/40 mx-auto" />
-              <p className="text-xs text-slate-400 font-mono">No edge selected.</p>
-              <p className="text-[11px] text-slate-500 max-w-[220px] mx-auto">
+              <Info className="w-8 h-8 text-[#0b7a83]/40 mx-auto" />
+              <p className="text-xs text-[#4a5566] font-mono">No edge selected.</p>
+              <p className="text-[11px] text-[#7a8596] max-w-[220px] mx-auto">
                 Click any edge on the graph canvas to inspect confidence, reasoning, or execute human review.
               </p>
             </div>
@@ -771,9 +771,9 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
         {/* --- SCAN TAB --- */}
         {activeTab === 'scan' && (
           <div className="space-y-4">
-            <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3.5 space-y-2">
+            <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3.5 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-slate-400 uppercase">SCAN METADATA</span>
+                <span className="text-[10px] font-mono text-[#4a5566] uppercase">SCAN METADATA</span>
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                   {selectedScan?.status || 'Active'}
                 </span>
@@ -781,12 +781,12 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
               <div className="space-y-1.5 pt-1">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Scan ID</span>
-                  <div className="flex items-center gap-1 font-mono text-slate-200">
+                  <span className="text-[#4a5566]">Scan ID</span>
+                  <div className="flex items-center gap-1 font-mono text-[#18202c]">
                     <span>#{scanId.slice(0, 8)}</span>
                     <button
                       onClick={() => copyToClipboard(scanId, 'scanId')}
-                      className="text-slate-400 hover:text-slate-200 p-0.5 rounded cursor-pointer"
+                      className="text-[#4a5566] hover:text-[#18202c] p-0.5 rounded cursor-pointer"
                     >
                       {copiedKey === 'scanId' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                     </button>
@@ -794,16 +794,16 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Target URL</span>
-                  <span className="font-mono text-indigo-300 truncate max-w-[180px]">
+                  <span className="text-[#4a5566]">Target URL</span>
+                  <span className="font-mono text-[#0b7a83] truncate max-w-[180px]">
                     {selectedScan?.target_url || 'http://localhost:3000'}
                   </span>
                 </div>
 
                 {selectedScan?.created_at && (
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Created</span>
-                    <span className="font-mono text-slate-200">
+                    <span className="text-[#4a5566]">Created</span>
+                    <span className="font-mono text-[#18202c]">
                       {new Date(selectedScan.created_at).toLocaleString()}
                     </span>
                   </div>
@@ -813,38 +813,38 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 
             {/* Counts Summary Grid */}
             <div className="space-y-1.5">
-              <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+              <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#4a5566]">
                 Scan Summary Counts
               </h4>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3">
-                  <span className="text-slate-400 block text-[11px]">Total Nodes</span>
-                  <span className="text-lg font-bold font-mono text-slate-100">{nodes.length}</span>
+                <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3">
+                  <span className="text-[#4a5566] block text-[11px]">Total Nodes</span>
+                  <span className="text-lg font-bold font-mono text-[#18202c]">{nodes.length}</span>
                 </div>
-                <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3">
-                  <span className="text-slate-400 block text-[11px]">Total Edges</span>
-                  <span className="text-lg font-bold font-mono text-slate-100">{edges.length}</span>
+                <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3">
+                  <span className="text-[#4a5566] block text-[11px]">Total Edges</span>
+                  <span className="text-lg font-bold font-mono text-[#18202c]">{edges.length}</span>
                 </div>
-                <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3">
-                  <span className="text-slate-400 block text-[11px]">Verified Edges</span>
+                <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3">
+                  <span className="text-[#4a5566] block text-[11px]">Verified Edges</span>
                   <span className="text-lg font-bold font-mono text-emerald-400">
                     {edges.filter((e) => e.status === 'verified').length}
                   </span>
                 </div>
-                <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3">
-                  <span className="text-slate-400 block text-[11px]">Refuted Edges</span>
-                  <span className="text-lg font-bold font-mono text-slate-400">
+                <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3">
+                  <span className="text-[#4a5566] block text-[11px]">Refuted Edges</span>
+                  <span className="text-lg font-bold font-mono text-[#4a5566]">
                     {edges.filter((e) => e.status === 'refuted').length}
                   </span>
                 </div>
-                <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3">
-                  <span className="text-slate-400 block text-[11px]">Human Invalidated</span>
+                <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3">
+                  <span className="text-[#4a5566] block text-[11px]">Human Invalidated</span>
                   <span className="text-lg font-bold font-mono text-pink-400">
                     {edges.filter((e) => e.status === 'human_invalidated').length}
                   </span>
                 </div>
-                <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl p-3">
-                  <span className="text-slate-400 block text-[11px]">Undermined Nodes</span>
+                <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl p-3">
+                  <span className="text-[#4a5566] block text-[11px]">Undermined Nodes</span>
                   <span className="text-lg font-bold font-mono text-amber-400">
                     {nodes.filter((n) => n.undermined).length}
                   </span>

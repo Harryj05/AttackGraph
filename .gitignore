@@ -29,3 +29,6 @@ eval/results/*.json
 !eval/results/mode_comparison_crapi.json
 !eval/results/mode_comparison_juiceshop.json
 !eval/results/mode_comparison.json
+
+# Local SQLite artifacts
+*.db

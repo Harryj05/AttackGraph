@@ -257,15 +257,15 @@ export function App() {
 
   if (loadingScans) {
     return (
-      <div className="h-screen w-screen bg-[#0B0D1A] flex flex-col items-center justify-center text-xs font-mono text-slate-400 gap-3">
-        <RefreshCw className="w-6 h-6 animate-spin text-[#6366F1]" />
+      <div className="h-screen w-screen bg-[#eef1f5] flex flex-col items-center justify-center text-xs font-mono text-[#4a5566] gap-3">
+        <RefreshCw className="w-6 h-6 animate-spin text-[#0b7a83]" />
         <span>INITIALIZING ATTACKGRAPH AI SOC FRONTEND...</span>
       </div>
     );
   }
 
   return (
-    <div className="h-screen w-screen bg-[#0B0D1A] flex flex-row overflow-hidden font-sans text-slate-200">
+    <div className="h-screen w-screen bg-[#eef1f5] flex flex-row overflow-hidden font-sans text-[#18202c]">
       {/* 1. Left Sidebar Navigation */}
       <Sidebar currentView={currentView} onSelectView={handleSelectView} />
 
@@ -370,7 +370,7 @@ export function App() {
               {/* Main Graph View */}
               <main className="flex-1 flex flex-col relative h-full overflow-hidden">
                 {loadingGraph && (
-                  <div className="absolute inset-0 bg-[#0B0D1A]/80 z-30 flex items-center justify-center text-xs font-mono text-indigo-400 gap-2">
+                  <div className="absolute inset-0 bg-[#eef1f5]/80 z-30 flex items-center justify-center text-xs font-mono text-[#0b7a83] gap-2">
                     <RefreshCw className="w-4 h-4 animate-spin" />
                     <span>Rendering Scan Graph...</span>
                   </div>

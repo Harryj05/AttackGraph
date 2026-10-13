@@ -26,9 +26,9 @@ export const CustomGraphNode = memo(({ data, selected }: NodeProps<CustomNodeTyp
 
 
   // Color scheme and icons by node_type
-  let borderColor = 'border-slate-700/80';
-  let badgeBg = 'bg-slate-500/10 text-slate-300 border-slate-500/30';
-  let iconComponent = <Database className="w-4 h-4 text-slate-400 shrink-0" />;
+  let borderColor = 'border-[#cfd6df]/80';
+  let badgeBg = 'bg-[#7a8596]/10 text-[#4a5566] border-[#7a8596]/30';
+  let iconComponent = <Database className="w-4 h-4 text-[#4a5566] shrink-0" />;
   let typeLabel = node.node_type.toUpperCase();
 
   if (type.includes('ppp_service') || type === 'service') {
@@ -74,31 +74,31 @@ export const CustomGraphNode = memo(({ data, selected }: NodeProps<CustomNodeTyp
   }
 
   return (
-    <div 
+    <div
       className={`relative group transition-opacity duration-200 ${
         isDimmed ? 'opacity-25' : 'opacity-100'
-      }`}
+      } ${isCritical ? 'pulse-ring rounded-xl' : ''}`}
     >
       {/* Left target handle for LR layout */}
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-2 !h-2 !bg-[#12152A] !border !border-slate-500 !left-[-4px]"
+        className="!w-2 !h-2 !bg-[#f8f9fb] !border !border-[#7a8596] !left-[-4px]"
       />
 
       {/* Main Node Card */}
       <div
-        className={`w-[220px] h-[72px] p-2.5 rounded-xl bg-[#12152A] border transition-all cursor-pointer flex flex-col justify-between select-none ${borderColor} ${
+        className={`w-[220px] h-[72px] p-2.5 rounded-xl bg-[#f8f9fb] border transition-all duration-150 cursor-pointer flex flex-col justify-between select-none hover:-translate-y-0.5 ${borderColor} ${
           isCritical ? 'glow-critical' : ''
         } ${
-          selected ? 'ring-2 ring-[#6366F1] glow-selected border-[#6366F1]' : 'hover:border-slate-400/50'
-        } ${isUndermined ? 'opacity-60 bg-[#161726]' : ''} ${isReplayNew ? 'replay-pulse' : ''}`}
+          selected ? 'ring-2 ring-[#0b7a83] glow-selected border-[#0b7a83]' : 'hover:border-[#4a5566]/50 hover:shadow-lg hover:shadow-black/40'
+        } ${isUndermined ? 'opacity-60 bg-[#eceff3]' : ''} ${isReplayNew ? 'replay-pulse' : ''}`}
       >
         {/* Top Header Row: Icon + Label */}
         <div className="flex items-center gap-2 min-w-0">
           <div className="shrink-0">{iconComponent}</div>
           <div 
-            className="text-[13px] font-semibold text-slate-100 truncate flex-1 min-w-0 font-sans"
+            className="text-[13px] font-semibold text-[#18202c] truncate flex-1 min-w-0 font-sans"
             title={node.label}
           >
             {node.label}
@@ -106,7 +106,7 @@ export const CustomGraphNode = memo(({ data, selected }: NodeProps<CustomNodeTyp
         </div>
 
         {/* Badges & Flags Row */}
-        <div className="flex items-center justify-between gap-1.5 pt-1 border-t border-[#ffffff0f]">
+        <div className="flex items-center justify-between gap-1.5 pt-1 border-t border-[#18202c17]">
           <div className="flex items-center gap-1 min-w-0 overflow-hidden">
             <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded-md border truncate ${badgeBg}`}>
               {typeLabel}
@@ -127,7 +127,7 @@ export const CustomGraphNode = memo(({ data, selected }: NodeProps<CustomNodeTyp
             )}
           </div>
 
-          <span className="text-[11px] font-mono text-slate-400 shrink-0">
+          <span className="text-[11px] font-mono text-[#4a5566] shrink-0">
             #{node.id.slice(0, 6)}
           </span>
         </div>
@@ -137,7 +137,7 @@ export const CustomGraphNode = memo(({ data, selected }: NodeProps<CustomNodeTyp
       <Handle
         type="source"
         position={Position.Right}
-        className="!w-2 !h-2 !bg-[#12152A] !border !border-slate-500 !right-[-4px]"
+        className="!w-2 !h-2 !bg-[#f8f9fb] !border !border-[#7a8596] !right-[-4px]"
       />
     </div>
   );

@@ -89,38 +89,38 @@ export const TopBar: React.FC<TopBarProps> = ({
     }
 
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-500/15 text-slate-300 border border-slate-500/30">
-        <span className="w-2 h-2 rounded-full bg-slate-400" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#7a8596]/15 text-[#4a5566] border border-[#7a8596]/30">
+        <span className="w-2 h-2 rounded-full bg-[#4a5566]" />
         {st}
       </span>
     );
   };
 
   return (
-    <header className="h-14 bg-[#0B0D1A] border-b border-[#ffffff14] px-6 flex items-center justify-between gap-4 select-none shrink-0 z-20 relative">
+    <header className="h-14 bg-[#eef1f5] border-b border-[#18202c1f] px-6 flex items-center justify-between gap-4 select-none shrink-0 z-20 relative">
       {/* Left: Scan & Target info cards */}
       <div className="flex items-center gap-3">
         {/* Scan Selector & ID Pill */}
-        <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl px-3 py-1 flex items-center gap-2">
-          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">SCAN</span>
+        <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl px-3 py-1 flex items-center gap-2">
+          <span className="text-[11px] font-mono text-[#4a5566] uppercase tracking-wider">SCAN</span>
           <div className="relative flex items-center">
             <select
               value={selectedScanId}
               onChange={(e) => onSelectScan(e.target.value)}
-              className="bg-transparent text-xs font-mono font-semibold text-slate-100 pr-5 focus:outline-none cursor-pointer appearance-none"
+              className="bg-transparent text-xs font-mono font-semibold text-[#18202c] pr-5 focus:outline-none cursor-pointer appearance-none"
             >
               {scans.map((scan) => (
-                <option key={scan.id} value={scan.id} className="bg-[#12152A] text-slate-200">
+                <option key={scan.id} value={scan.id} className="bg-[#f8f9fb] text-[#18202c]">
                   #{scan.id.slice(0, 8)}
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-0 pointer-events-none" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#4a5566] absolute right-0 pointer-events-none" />
           </div>
 
           <button
             onClick={() => copyToClipboard(selectedScanId, 'id')}
-            className="text-slate-400 hover:text-slate-200 p-1 rounded hover:bg-slate-800/50 transition-colors cursor-pointer ml-1"
+            className="text-[#4a5566] hover:text-[#18202c] p-1 rounded hover:bg-[#e4e8ee]/50 transition-colors cursor-pointer ml-1"
             title="Copy Scan ID"
           >
             {copiedField === 'id' ? (
@@ -132,14 +132,14 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
 
         {/* Target URL Pill */}
-        <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl px-3 py-1 flex items-center gap-2">
-          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">TARGET</span>
-          <span className="text-xs font-mono text-indigo-300 font-medium truncate max-w-[200px]">
+        <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl px-3 py-1 flex items-center gap-2">
+          <span className="text-[11px] font-mono text-[#4a5566] uppercase tracking-wider">TARGET</span>
+          <span className="text-xs font-mono text-[#0b7a83] font-medium truncate max-w-[200px]">
             {targetUrl}
           </span>
           <button
             onClick={() => copyToClipboard(targetUrl, 'url')}
-            className="text-slate-400 hover:text-slate-200 p-1 rounded hover:bg-slate-800/50 transition-colors cursor-pointer"
+            className="text-[#4a5566] hover:text-[#18202c] p-1 rounded hover:bg-[#e4e8ee]/50 transition-colors cursor-pointer"
             title="Copy Target URL"
           >
             {copiedField === 'url' ? (
@@ -151,8 +151,8 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
 
         {/* Read-only Status Badge */}
-        <div className="bg-[#12152A] border border-[#ffffff14] rounded-xl px-3 py-1 flex items-center gap-2">
-          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">STATUS</span>
+        <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-xl px-3 py-1 flex items-center gap-2">
+          <span className="text-[11px] font-mono text-[#4a5566] uppercase tracking-wider">STATUS</span>
           {getStatusBadge(status)}
         </div>
       </div>
@@ -162,10 +162,10 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* New Scan Button */}
         <button
           onClick={() => setShowNewScanModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#12152A] text-slate-300 border border-[#ffffff14] hover:bg-slate-800/50 hover:text-slate-100 transition-colors cursor-pointer"
+          className="btn-ink ghost small"
           title="Create a new scan against a target URL"
         >
-          <Plus className="w-4 h-4 text-indigo-400" />
+          <Plus className="w-4 h-4" />
           <span>New Scan</span>
         </button>
 
@@ -173,11 +173,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={onRunAgent}
           disabled={isRunningAgent || !selectedScanId}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold shadow-lg transition-all cursor-pointer ${
-            isRunningAgent || !selectedScanId
-              ? 'bg-[#6366F1]/50 text-slate-300 cursor-not-allowed'
-              : 'bg-[#6366F1] hover:bg-[#4F46E5] text-white shadow-indigo-500/20 active:scale-[0.98]'
-          }`}
+          className="btn-ink small"
         >
           {isRunningAgent ? (
             <>
@@ -196,15 +192,15 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* New Scan Popover / Modal */}
       {showNewScanModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#12152A] border border-[#ffffff14] rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl animate-in fade-in zoom-in duration-150">
+          <div className="bg-[#f8f9fb] border border-[#18202c1f] rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Globe className="w-5 h-5 text-indigo-400" />
-                <h3 className="text-sm font-bold text-slate-100">Create New Scan</h3>
+                <Globe className="w-5 h-5 text-[#0b7a83]" />
+                <h3 className="text-sm font-bold text-[#18202c]">Create New Scan</h3>
               </div>
               <button
                 onClick={() => setShowNewScanModal(false)}
-                className="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-slate-800/50 transition-colors cursor-pointer"
+                className="text-[#4a5566] hover:text-[#18202c] p-1 rounded-lg hover:bg-[#e4e8ee]/50 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -212,7 +208,7 @@ export const TopBar: React.FC<TopBarProps> = ({
 
             <form onSubmit={handleCreateScan} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-mono text-slate-400 block">
+                <label className="text-xs font-mono text-[#4a5566] block">
                   Target URL (must be in target allowlist)
                 </label>
                 <input
@@ -221,7 +217,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                   value={newTargetUrl}
                   onChange={(e) => setNewTargetUrl(e.target.value)}
                   placeholder="http://localhost:3000"
-                  className="w-full bg-[#0B0D1A] border border-[#ffffff14] text-xs font-mono text-slate-100 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-[#6366F1]"
+                  className="w-full bg-[#eef1f5] border border-[#18202c1f] text-xs font-mono text-[#18202c] rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-[#0b7a83]"
                 />
               </div>
 
@@ -235,14 +231,14 @@ export const TopBar: React.FC<TopBarProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowNewScanModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-medium bg-[#0B0D1A] text-slate-400 hover:text-slate-200 border border-[#ffffff14] cursor-pointer"
+                  className="btn-ink ghost small"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creatingScan}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#6366F1] hover:bg-[#4F46E5] text-white shadow-lg cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                  className="btn-ink small"
                 >
                   {creatingScan ? (
                     <>
